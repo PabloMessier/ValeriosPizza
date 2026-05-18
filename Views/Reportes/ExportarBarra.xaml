@@ -1,0 +1,45 @@
+<UserControl x:Class="ValeriosPizza.Views.Reportes.ExportarBarra"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="80" d:DesignWidth="1000">
+    <Grid>
+        <Grid Margin="0,0,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Background="#E3F2FD" Padding="15,10" CornerRadius="4">
+                <TextBlock Text="{Binding PeriodoTexto}" FontSize="14" Foreground="#1976D2" FontWeight="Medium"/>
+            </Border>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="15,0,0,0">
+                <Button Content="📊 CSV" Command="{Binding ExportarCSVCommand}"
+                        Padding="16,10" FontSize="12" Cursor="Hand" Margin="0,0,6,0"
+                        Background="#4CAF50" Foreground="White" BorderThickness="0"/>
+                <Button Content="📄 EXCEL" Command="{Binding ExportarExcelCommand}"
+                        Padding="16,10" FontSize="12" Cursor="Hand" Margin="0,0,6,0"
+                        Background="#1976D2" Foreground="White" BorderThickness="0"/>
+                <Button Content="📕 PDF" Command="{Binding ExportarPDFCommand}"
+                        Padding="16,10" FontSize="12" Cursor="Hand"
+                        Background="#C62828" Foreground="White" BorderThickness="0"/>
+            </StackPanel>
+        </Grid>
+        <TextBlock Text="{Binding MensajeExportacion}" FontSize="12"
+                   Foreground="#4CAF50" Margin="0,50,0,0" HorizontalAlignment="Right">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding MensajeExportacion}" Value="">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+    </Grid>
+</UserControl>

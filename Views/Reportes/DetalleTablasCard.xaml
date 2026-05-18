@@ -1,0 +1,156 @@
+<UserControl x:Class="ValeriosPizza.Views.Reportes.DetalleTablasCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:common="clr-namespace:ValeriosPizza.Views.Common"
+             mc:Ignorable="d"
+             d:DesignHeight="700" d:DesignWidth="1000">
+    <StackPanel>
+        <!-- Cajas y Conteos -->
+        <Grid Margin="0,0,0,15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource CardStyle}" Padding="15" Margin="0,0,8,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="CAJAS PARA PIZZAS (30 CM)" FontSize="12" Foreground="{DynamicResource TextMutedBrush}" FontWeight="Medium" Margin="0,0,0,10"/>
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding ResumenCajasPaged.Items}"
+                              AutoGenerateColumns="False" IsReadOnly="True"
+                              EnableRowVirtualization="True"
+                              BorderThickness="0" Background="Transparent"
+                              RowBackground="{DynamicResource CardBackgroundBrush}" AlternatingRowBackground="{DynamicResource CardAlternateRowBrush}"
+                              GridLinesVisibility="None" HeadersVisibility="Column"
+                              FontSize="12" RowHeight="34" MaxHeight="180">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="RECIBIDAS" Binding="{Binding Recibidas}" Width="*"/>
+                            <DataGridTextColumn Header="USADAS" Binding="{Binding Utilizadas}" Width="*"/>
+                            <DataGridTextColumn Header="MERMA" Binding="{Binding Merma}" Width="*"/>
+                            <DataGridTextColumn Header="DISPONIBLES" Binding="{Binding Disponible}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <common:PaginatorBar Grid.Row="2" DataContext="{Binding ResumenCajasPaged}"/>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="1" Style="{StaticResource CardStyle}" Padding="15" Margin="8,0,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="CONTEOS APERTURA / CIERRE" FontSize="12" Foreground="{DynamicResource TextMutedBrush}" FontWeight="Medium" Margin="0,0,0,10"/>
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding ResumenConteosPaged.Items}"
+                              AutoGenerateColumns="False" IsReadOnly="True"
+                              EnableRowVirtualization="True"
+                              BorderThickness="0" Background="Transparent"
+                              RowBackground="{DynamicResource CardBackgroundBrush}" AlternatingRowBackground="{DynamicResource CardAlternateRowBrush}"
+                              GridLinesVisibility="None" HeadersVisibility="Column"
+                              FontSize="12" RowHeight="34" MaxHeight="180">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="FECHA" Binding="{Binding FechaTexto}" Width="110"/>
+                            <DataGridTextColumn Header="TIPO" Binding="{Binding Tipo}" Width="100"/>
+                            <DataGridTextColumn Header="LÍNEAS" Binding="{Binding CantidadLineas}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <common:PaginatorBar Grid.Row="2" DataContext="{Binding ResumenConteosPaged}"/>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Tablas de detalle -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="300"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Movimientos por Ingrediente -->
+            <Border Grid.Column="0" Style="{StaticResource CardStyle}" Padding="15" Margin="0,0,10,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="MOVIMIENTOS POR INGREDIENTE" FontSize="12" Foreground="{DynamicResource TextMutedBrush}" FontWeight="Medium" Margin="0,0,0,10"/>
+
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding ResumenIngredientesPaged.Items}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              EnableRowVirtualization="True"
+                              EnableColumnVirtualization="True"
+                              BorderThickness="0"
+                              Background="Transparent"
+                              RowBackground="{DynamicResource CardBackgroundBrush}"
+                              AlternatingRowBackground="{DynamicResource CardAlternateRowBrush}"
+                              GridLinesVisibility="None"
+                              HeadersVisibility="Column"
+                              CanUserResizeRows="False"
+                              FontSize="12"
+                              RowHeight="34"
+                              MaxHeight="300">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="INGREDIENTE" Binding="{Binding Nombre}" Width="*"/>
+                            <DataGridTextColumn Header="ENTR." Binding="{Binding TotalEntradas, StringFormat=N1}" Width="55"/>
+                            <DataGridTextColumn Header="MERC." Binding="{Binding TotalMercancia, StringFormat=N1}" Width="55"/>
+                            <DataGridTextColumn Header="GAST." Binding="{Binding TotalGastos, StringFormat=N1}" Width="55"/>
+                            <DataGridTextColumn Header="MERM." Binding="{Binding TotalMermas, StringFormat=N1}" Width="55"/>
+                            <DataGridTemplateColumn Header="BALANCE" Width="70">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding BalanceTexto}" Foreground="{Binding ColorBalance}" FontWeight="Medium"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <common:PaginatorBar Grid.Row="2" DataContext="{Binding ResumenIngredientesPaged}"/>
+                </Grid>
+            </Border>
+
+            <!-- Cortesías por Producto -->
+            <Border Grid.Column="1" Style="{StaticResource CardStyle}" Padding="15">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="CORTESÍAS POR PRODUCTO" FontSize="12" Foreground="{DynamicResource TextMutedBrush}" FontWeight="Medium" Margin="0,0,0,10"/>
+
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding ResumenProductosPaged.Items}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              EnableRowVirtualization="True"
+                              BorderThickness="0"
+                              Background="Transparent"
+                              RowBackground="{DynamicResource CardBackgroundBrush}"
+                              AlternatingRowBackground="{DynamicResource CardAlternateRowBrush}"
+                              GridLinesVisibility="None"
+                              HeadersVisibility="Column"
+                              CanUserResizeRows="False"
+                              FontSize="12"
+                              RowHeight="34"
+                              MaxHeight="300">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="PRODUCTO" Binding="{Binding Nombre}" Width="*"/>
+                            <DataGridTextColumn Header="CANT." Binding="{Binding TotalCortesias}" Width="50"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <common:PaginatorBar Grid.Row="2" DataContext="{Binding ResumenProductosPaged}"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </StackPanel>
+</UserControl>

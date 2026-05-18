@@ -1,0 +1,69 @@
+<UserControl x:Class="ValeriosPizza.Views.Inventario.FiltrosYTotalesCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="160" d:DesignWidth="1000">
+    <Border Style="{StaticResource CardStyle}" Padding="15">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+                <TextBlock Text="FILTRAR POR:" FontSize="12" Foreground="{DynamicResource TextMutedBrush}" FontWeight="Medium" VerticalAlignment="Center" Margin="0,0,15,0"/>
+                <Button Content="HOY" Command="{Binding FiltrarHoyCommand}" Padding="18,8" FontSize="12" Margin="0,0,8,0" Cursor="Hand" BorderThickness="1" BorderBrush="{DynamicResource DividerBrush}"/>
+                <Button Content="SEMANA" Command="{Binding FiltrarSemanaCommand}" Padding="18,8" FontSize="12" Margin="0,0,8,0" Cursor="Hand" BorderThickness="1" BorderBrush="{DynamicResource DividerBrush}"/>
+                <Button Content="MES" Command="{Binding FiltrarMesCommand}" Padding="18,8" FontSize="12" Margin="0,0,15,0" Cursor="Hand" BorderThickness="1" BorderBrush="{DynamicResource DividerBrush}"/>
+                <TextBlock Text="{Binding PeriodoActual}" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="Medium" VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <WrapPanel Grid.Row="1" Orientation="Horizontal">
+                <Border Background="#E8F5E9" Padding="12,8" CornerRadius="4" Margin="0,0,8,8">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Entradas:" FontSize="12" Foreground="#4CAF50" Margin="0,0,5,0"/>
+                        <TextBlock Text="{Binding TotalEntradas}" FontSize="14" Foreground="#4CAF50" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="#E3F2FD" Padding="12,8" CornerRadius="4" Margin="0,0,8,8">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Gastos:" FontSize="12" Foreground="#2196F3" Margin="0,0,5,0"/>
+                        <TextBlock Text="{Binding TotalGastos}" FontSize="14" Foreground="#2196F3" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="#FFF3E0" Padding="12,8" CornerRadius="4" Margin="0,0,8,8">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Mermas:" FontSize="12" Foreground="#FF9800" Margin="0,0,5,0"/>
+                        <TextBlock Text="{Binding TotalMermas}" FontSize="14" Foreground="#FF9800" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="#F3E5F5" Padding="12,8" CornerRadius="4" Margin="0,0,8,8">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Cortesías:" FontSize="12" Foreground="#9C27B0" Margin="0,0,5,0"/>
+                        <TextBlock Text="{Binding TotalCortesias}" FontSize="14" Foreground="#9C27B0" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="#E0F7FA" Padding="12,8" CornerRadius="4" Margin="0,0,8,8">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Mercancía:" FontSize="12" Foreground="#00BCD4" Margin="0,0,5,0"/>
+                        <TextBlock Text="{Binding TotalMercancias}" FontSize="14" Foreground="#00BCD4" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="#EFEBE9" Padding="12,8" CornerRadius="4" Margin="0,0,8,8">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Cajas:" FontSize="12" Foreground="#795548" Margin="0,0,5,0"/>
+                        <TextBlock Text="{Binding TotalCajas}" FontSize="14" Foreground="#795548" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="#E8EAF6" Padding="12,8" CornerRadius="4" Margin="0,0,0,8">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Conteos:" FontSize="12" Foreground="#3F51B5" Margin="0,0,5,0"/>
+                        <TextBlock Text="{Binding TotalConteos}" FontSize="14" Foreground="#3F51B5" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+            </WrapPanel>
+        </Grid>
+    </Border>
+</UserControl>

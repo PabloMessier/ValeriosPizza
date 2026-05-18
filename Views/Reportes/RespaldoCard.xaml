@@ -1,0 +1,37 @@
+<UserControl x:Class="ValeriosPizza.Views.Reportes.RespaldoCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="120" d:DesignWidth="1000">
+    <Border Style="{StaticResource CardStyle}" Padding="20">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                <TextBlock Text="RESPALDO Y MIGRACIÓN DE BASE DE DATOS"
+                           FontSize="12" Foreground="{DynamicResource TextMutedBrush}" FontWeight="Medium"/>
+                <TextBlock FontSize="13" Foreground="#555" Margin="0,8,0,0" TextWrapping="Wrap">
+                    Exporta toda la base de datos a un archivo portable (.valdb) para crear un respaldo
+                    o para migrar los datos a una versión futura del sistema. Importa un respaldo
+                    previamente generado para restaurar el historial completo.
+                </TextBlock>
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0,0,0">
+                <Button Content="💾 EXPORTAR BASE DE DATOS"
+                        Command="{Binding ExportarBaseDatosCommand}"
+                        Padding="16,10" FontSize="12" Cursor="Hand" Margin="0,0,8,0"
+                        Background="#37474F" Foreground="White" BorderThickness="0"/>
+                <Button Content="📥 IMPORTAR BASE DE DATOS"
+                        Command="{Binding ImportarBaseDatosCommand}"
+                        Padding="16,10" FontSize="12" Cursor="Hand"
+                        Background="#6A1B9A" Foreground="White" BorderThickness="0"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

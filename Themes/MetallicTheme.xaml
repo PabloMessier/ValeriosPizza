@@ -1,0 +1,44 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Tema METALICO (sistema): superficies grises plateadas con acentos azulados. -->
+
+    <SolidColorBrush x:Key="WindowBackgroundBrush"  Color="#ECEFF1"/>
+    <SolidColorBrush x:Key="SidebarBackgroundBrush" Color="#37474F"/>
+    <SolidColorBrush x:Key="SidebarLogoFrameBrush"  Color="#455A64"/>
+    <SolidColorBrush x:Key="SidebarLogoBorderBrush" Color="#546E7A"/>
+    <SolidColorBrush x:Key="SidebarHoverBrush"      Color="#455A64"/>
+    <SolidColorBrush x:Key="SidebarPressedBrush"    Color="#546E7A"/>
+    <SolidColorBrush x:Key="SidebarMutedTextBrush"  Color="#B0BEC5"/>
+    <SolidColorBrush x:Key="SidebarSubtitleBrush"   Color="#90A4AE"/>
+
+    <SolidColorBrush x:Key="CardBackgroundBrush"   Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="CardBorderBrush"       Color="#CFD8DC"/>
+    <SolidColorBrush x:Key="CardAlternateRowBrush" Color="#F5F7F8"/>
+
+    <SolidColorBrush x:Key="TextPrimaryBrush"   Color="#263238"/>
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="#546E7A"/>
+    <SolidColorBrush x:Key="TextMutedBrush"     Color="#90A4AE"/>
+    <SolidColorBrush x:Key="TextSubtleBrush"    Color="#B0BEC5"/>
+    <SolidColorBrush x:Key="TextOnDarkBrush"    Color="#FFFFFF"/>
+
+    <SolidColorBrush x:Key="AccentBrush"        Color="#37474F"/>
+    <SolidColorBrush x:Key="AccentHoverBrush"   Color="#546E7A"/>
+    <SolidColorBrush x:Key="AccentTextBrush"    Color="#FFFFFF"/>
+
+    <SolidColorBrush x:Key="DividerBrush"         Color="#CFD8DC"/>
+    <SolidColorBrush x:Key="InputBackgroundBrush" Color="#FFFFFF"/>
+
+    <!-- Resaltado de "Hoy" en la vista semanal de inventario. -->
+    <SolidColorBrush x:Key="TodayHighlightBrush"      Color="#CFD8DC"/>
+    <SolidColorBrush x:Key="OtherDayBackgroundBrush"  Color="#F5F7F8"/>
+
+    <!-- DataGrid -->
+    <SolidColorBrush x:Key="DataGridHeaderForegroundBrush" Color="#546E7A"/>
+    <SolidColorBrush x:Key="DataGridHeaderBackgroundBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="DataGridHeaderUnderlineBrush"  Color="#CFD8DC"/>
+    <SolidColorBrush x:Key="DataGridCellForegroundBrush"   Color="#263238"/>
+    <SolidColorBrush x:Key="DataGridSelectedBrush"         Color="#CFD8DC"/>
+    <SolidColorBrush x:Key="DataGridSelectedForegroundBrush" Color="#263238"/>
+
+</ResourceDictionary>

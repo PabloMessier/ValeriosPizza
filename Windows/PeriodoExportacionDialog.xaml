@@ -1,0 +1,138 @@
+<Window x:Class="ValeriosPizza.Windows.PeriodoExportacionDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Período de exportación"
+        Width="780" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize" ShowInTaskbar="False"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        TextElement.Foreground="{DynamicResource TextPrimaryBrush}">
+    <Border Padding="22">
+        <StackPanel>
+            <TextBlock x:Name="EncabezadoTextBlock"
+                       Text="Seleccione el período del reporte"
+                       FontSize="18" FontWeight="SemiBold"
+                       Foreground="{DynamicResource TextPrimaryBrush}"
+                       Margin="0,0,0,4"/>
+            <TextBlock Text="Elija un atajo o use el calendario para seleccionar fechas y horas exactas."
+                       FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
+                       TextWrapping="Wrap" Margin="0,0,0,16"/>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="270"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Atajos rápidos -->
+                <GroupBox Grid.Column="0" Header="Atajos" Padding="10" Margin="0,0,12,0">
+                    <StackPanel>
+                        <RadioButton x:Name="RbHoy"        Content="Hoy" Margin="0,4" Checked="Atajo_Checked"/>
+                        <RadioButton x:Name="RbAyer"       Content="Ayer" Margin="0,4" Checked="Atajo_Checked"/>
+                        <RadioButton x:Name="RbUltimos7"   Content="Últimos 7 días" Margin="0,4" Checked="Atajo_Checked"/>
+                        <RadioButton x:Name="RbSemana"     Content="Esta semana (lunes – hoy)" Margin="0,4" Checked="Atajo_Checked"/>
+                        <RadioButton x:Name="RbUltimos30"  Content="Últimos 30 días" Margin="0,4" Checked="Atajo_Checked"/>
+                        <RadioButton x:Name="RbEsteMes"    Content="Este mes" IsChecked="True" Margin="0,4" Checked="Atajo_Checked"/>
+                        <RadioButton x:Name="RbMesAnterior" Content="Mes anterior" Margin="0,4" Checked="Atajo_Checked"/>
+                        <RadioButton x:Name="RbEsteAno"    Content="Este año" Margin="0,4" Checked="Atajo_Checked"/>
+                        <RadioButton x:Name="RbAnoAnterior" Content="Año anterior" Margin="0,4" Checked="Atajo_Checked"/>
+                        <RadioButton x:Name="RbTodo"       Content="Todo el historial" Margin="0,4" Checked="Atajo_Checked"/>
+                        <RadioButton x:Name="RbPersonalizado" Content="Personalizado…" Margin="0,8,0,4"
+                                     Checked="RbPersonalizado_Checked"/>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- Calendario y selectores de hora. Si la usuaria toca cualquiera
+                     de estos controles, el modo cambia automáticamente a "Personalizado". -->
+                <GroupBox Grid.Column="1" Header="Fechas y horas (calendario)" Padding="10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Desde -->
+                        <StackPanel Grid.Column="0" Margin="0,0,6,0">
+                            <TextBlock Text="Desde" FontSize="12" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       Margin="0,0,0,4"/>
+                            <Calendar x:Name="CalendarioInicio"
+                                      SelectionMode="SingleDate"
+                                      SelectedDatesChanged="CalendarioInicio_SelectedDatesChanged"/>
+                            <Grid Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Hora:" VerticalAlignment="Center"
+                                           Margin="0,0,6,0" FontSize="12"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                <ComboBox Grid.Column="1" x:Name="HoraInicioComboBox"
+                                          Padding="6,4" FontSize="13"
+                                          SelectionChanged="HoraOMinuto_Changed"/>
+                                <TextBlock Grid.Column="2" Text=":" VerticalAlignment="Center"
+                                           Margin="6,0,6,0" FontSize="14" FontWeight="SemiBold"/>
+                                <ComboBox Grid.Column="3" x:Name="MinutoInicioComboBox"
+                                          Padding="6,4" FontSize="13"
+                                          SelectionChanged="HoraOMinuto_Changed"/>
+                            </Grid>
+                            <TextBlock x:Name="ResumenInicio" FontSize="11"
+                                       Foreground="{DynamicResource TextMutedBrush}"
+                                       Margin="0,6,0,0"/>
+                        </StackPanel>
+
+                        <!-- Hasta -->
+                        <StackPanel Grid.Column="1" Margin="6,0,0,0">
+                            <TextBlock Text="Hasta" FontSize="12" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextSecondaryBrush}"
+                                       Margin="0,0,0,4"/>
+                            <Calendar x:Name="CalendarioFin"
+                                      SelectionMode="SingleDate"
+                                      SelectedDatesChanged="CalendarioFin_SelectedDatesChanged"/>
+                            <Grid Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Hora:" VerticalAlignment="Center"
+                                           Margin="0,0,6,0" FontSize="12"
+                                           Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                <ComboBox Grid.Column="1" x:Name="HoraFinComboBox"
+                                          Padding="6,4" FontSize="13"
+                                          SelectionChanged="HoraOMinuto_Changed"/>
+                                <TextBlock Grid.Column="2" Text=":" VerticalAlignment="Center"
+                                           Margin="6,0,6,0" FontSize="14" FontWeight="SemiBold"/>
+                                <ComboBox Grid.Column="3" x:Name="MinutoFinComboBox"
+                                          Padding="6,4" FontSize="13"
+                                          SelectionChanged="HoraOMinuto_Changed"/>
+                            </Grid>
+                            <TextBlock x:Name="ResumenFin" FontSize="11"
+                                       Foreground="{DynamicResource TextMutedBrush}"
+                                       Margin="0,6,0,0"/>
+                        </StackPanel>
+                    </Grid>
+                </GroupBox>
+            </Grid>
+
+            <TextBlock x:Name="MensajeError" Foreground="#C62828" FontSize="12"
+                       TextWrapping="Wrap" Margin="0,12,0,0" Visibility="Collapsed"/>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+                <Button Content="Cancelar" Click="Cancelar_Click"
+                        Padding="18,8" Margin="0,0,8,0" Cursor="Hand"
+                        Background="Transparent"
+                        BorderBrush="{DynamicResource DividerBrush}" BorderThickness="1"
+                        Foreground="{DynamicResource TextSecondaryBrush}"/>
+                <Button Content="Exportar"
+                        Click="Aceptar_Click"
+                        IsDefault="True"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Padding="22,8"/>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>

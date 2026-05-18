@@ -1,0 +1,36 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+indent_style = space
+trim_trailing_whitespace = true
+
+[*.{cs,xaml}]
+indent_size = 4
+
+[*.{csproj,json,yml,yaml}]
+indent_size = 2
+
+[*.cs]
+# Modern C# preferences (kept light to minimize churn).
+csharp_new_line_before_open_brace = all
+csharp_indent_case_contents = true
+csharp_indent_switch_labels = true
+csharp_style_var_for_built_in_types = false:silent
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_namespace_declarations = file_scoped:suggestion
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_style_qualification_for_property = false:suggestion
+dotnet_style_qualification_for_method = false:suggestion
+dotnet_style_qualification_for_event = false:suggestion
+
+# Quiet a few analyzer rules that don't fit the WPF project style.
+dotnet_diagnostic.CA1062.severity = none      # Validate parameters
+dotnet_diagnostic.CA1303.severity = none      # Localize literal strings
+dotnet_diagnostic.CA1305.severity = none      # IFormatProvider on ToString()
+dotnet_diagnostic.CA1304.severity = none      # CultureInfo on string ops
+dotnet_diagnostic.CA1310.severity = none      # StringComparison
+dotnet_diagnostic.CA1311.severity = none      # ToUpper/ToLower invariants
+dotnet_diagnostic.CA1822.severity = suggestion # Mark members static

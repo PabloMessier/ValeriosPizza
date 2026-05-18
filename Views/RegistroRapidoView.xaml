@@ -1,0 +1,56 @@
+<UserControl x:Class="ValeriosPizza.Views.RegistroRapidoView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:rr="clr-namespace:ValeriosPizza.Views.RegistroRapido"
+             mc:Ignorable="d"
+             d:DesignHeight="900" d:DesignWidth="1000"
+             Background="{DynamicResource WindowBackgroundBrush}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="20,15">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" Margin="0,0,0,15">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Registro Rápido" FontSize="26" FontWeight="Light" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Command="{Binding DataContext.DeshacerCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                            ToolTip="{Binding DataContext.UndoRedo.DescripcionProximoDeshacer, RelativeSource={RelativeSource AncestorType=Window}, StringFormat='Deshacer: {0}', FallbackValue='Deshacer (Ctrl+Z)'}"
+                            Style="{StaticResource UndoRedoButtonStyle}" Margin="0,0,10,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="↶" FontSize="18" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="DESHACER" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Command="{Binding DataContext.RehacerCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                            ToolTip="{Binding DataContext.UndoRedo.DescripcionProximoRehacer, RelativeSource={RelativeSource AncestorType=Window}, StringFormat='Rehacer: {0}', FallbackValue='Rehacer (Ctrl+Y)'}"
+                            Style="{StaticResource UndoRedoButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="↷" FontSize="18" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="REHACER" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <rr:MovimientosCard      Grid.Row="1" Margin="0,0,0,10"/>
+            <rr:DiscosCard           Grid.Row="2" Margin="0,0,0,10"/>
+            <rr:CajasCard            Grid.Row="3" Margin="0,0,0,10"/>
+            <rr:EntradaCard          Grid.Row="4" Margin="0,0,0,10"/>
+            <rr:ConteoAperturaCard   Grid.Row="5" Margin="0,0,0,10"/>
+            <rr:ConteoCierreCard     Grid.Row="6"/>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

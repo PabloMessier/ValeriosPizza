@@ -1,0 +1,298 @@
+<UserControl x:Class="ValeriosPizza.Views.MercanciaNuevaView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:common="clr-namespace:ValeriosPizza.Views.Common"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800"
+             Background="{DynamicResource WindowBackgroundBrush}">
+    <Grid Margin="20,15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Encabezado -->
+        <Grid Grid.Row="0" Margin="0,0,0,15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="Mercancía Nueva" FontSize="26" FontWeight="Light" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                <TextBlock Text="Registrar ingredientes recibidos de proveedores" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,4,0,0"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Command="{Binding DataContext.DeshacerCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                        ToolTip="{Binding DataContext.UndoRedo.DescripcionProximoDeshacer, RelativeSource={RelativeSource AncestorType=Window}, StringFormat='Deshacer: {0}', FallbackValue='Deshacer (Ctrl+Z)'}"
+                        Style="{StaticResource UndoRedoButtonStyle}" Margin="0,0,10,0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="↶" FontSize="18" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="DESHACER" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+                <Button Command="{Binding DataContext.RehacerCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                        ToolTip="{Binding DataContext.UndoRedo.DescripcionProximoRehacer, RelativeSource={RelativeSource AncestorType=Window}, StringFormat='Rehacer: {0}', FallbackValue='Rehacer (Ctrl+Y)'}"
+                        Style="{StaticResource UndoRedoButtonStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="↷" FontSize="18" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="REHACER" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Formulario -->
+        <Border Grid.Row="1" Style="{StaticResource CardStyle}" Padding="20" Margin="0,0,0,15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Column="0" Grid.Row="0" Margin="0,0,10,12">
+                    <TextBlock Text="Ingrediente *" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                    <ComboBox ItemsSource="{Binding Ingredientes}" 
+                              SelectedItem="{Binding IngredienteSeleccionado}"
+                              DisplayMemberPath="Nombre"
+                              Padding="12,10" FontSize="14"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Grid.Row="0" Margin="5,0,5,12">
+                    <TextBlock Text="Cantidad *" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding Cantidad, UpdateSourceTrigger=PropertyChanged}" 
+                             Style="{StaticResource ModernTextBoxStyle}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Grid.Row="0" Margin="10,0,0,12">
+                    <TextBlock Text="Proveedor" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding Proveedor, UpdateSourceTrigger=PropertyChanged}" 
+                             Style="{StaticResource ModernTextBoxStyle}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="0" Grid.Row="1" Margin="0,0,10,12">
+                    <TextBlock Text="# Factura" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding NumeroFactura, UpdateSourceTrigger=PropertyChanged}" 
+                             Style="{StaticResource ModernTextBoxStyle}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1" Margin="5,0,0,12">
+                    <TextBlock Text="Notas" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                    <TextBox Text="{Binding Notas, UpdateSourceTrigger=PropertyChanged}" 
+                             Style="{StaticResource ModernTextBoxStyle}"/>
+                </StackPanel>
+
+                <!-- Adjuntar factura digital (PDF / imagen) -->
+                <StackPanel Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,12" VerticalAlignment="Center">
+                    <TextBlock Text="Factura digital:" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <Button Content="📎  Adjuntar archivo" Command="{Binding SeleccionarFacturaCommand}"
+                            Padding="14,8" FontSize="13" Cursor="Hand"
+                            Background="Transparent" Foreground="{DynamicResource TextPrimaryBrush}"
+                            BorderBrush="{DynamicResource DividerBrush}" BorderThickness="1"/>
+                    <TextBlock Text="{Binding NombreFacturaAdjunta}" FontSize="13"
+                               Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"
+                               Margin="12,0,0,0" TextTrimming="CharacterEllipsis" MaxWidth="360"/>
+                    <Button Content="Ver" Command="{Binding AbrirFacturaActualCommand}"
+                            Visibility="{Binding TieneFacturaAdjunta, Converter={StaticResource BoolToVisibilityConverter}}"
+                            Padding="10,6" FontSize="12" Margin="10,0,0,0" Cursor="Hand"
+                            Background="Transparent" Foreground="{DynamicResource AccentBrush}"
+                            BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1"/>
+                    <Button Content="Quitar" Command="{Binding QuitarFacturaCommand}"
+                            Visibility="{Binding TieneFacturaAdjunta, Converter={StaticResource BoolToVisibilityConverter}}"
+                            Padding="10,6" FontSize="12" Margin="6,0,0,0" Cursor="Hand"
+                            Background="Transparent" Foreground="#C62828"
+                            BorderBrush="#C62828" BorderThickness="1"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="3"
+                            Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="{Binding TextoBotonGuardar}"
+                            Command="{Binding GuardarMercanciaCommand}"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            Padding="28,12"/>
+                    <Button Content="CANCELAR EDICIÓN"
+                            Command="{Binding CancelarEdicionCommand}"
+                            Visibility="{Binding EnModoEdicion, Converter={StaticResource BoolToVisibilityConverter}}"
+                            Margin="12,0,0,0" Padding="22,12" FontSize="13"
+                            Cursor="Hand"
+                            Background="Transparent"
+                            Foreground="{DynamicResource TextSecondaryBrush}"
+                            BorderBrush="{DynamicResource DividerBrush}"
+                            BorderThickness="1"/>
+                </StackPanel>
+
+                <!-- Calculadora COP (helper de UI, no se persiste en BD) -->
+                <Border Grid.Column="0" Grid.ColumnSpan="3" Grid.Row="4"
+                        BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,1,0,0"
+                        Margin="0,15,0,0" Padding="0,12,0,0"
+                        DataContext="{Binding CalcMercancia}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                            <TextBlock Text="PRECIO UNIT. (COP)" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}"/>
+                            <TextBox Text="{Binding PrecioUnitario, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}" FontSize="14" Padding="10,8" Margin="0,4,0,0"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="8,0,8,0">
+                            <TextBlock Text="IMPUESTO (COP)" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}"/>
+                            <TextBox Text="{Binding Impuesto, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}" FontSize="14" Padding="10,8" Margin="0,4,0,0"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Margin="8,0,8,0">
+                            <TextBlock Text="RETENCIÓN (COP)" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}"/>
+                            <TextBox Text="{Binding Retencion, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}" FontSize="14" Padding="10,8" Margin="0,4,0,0"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="3" Margin="16,0,8,0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Subtotal, StringFormat=Subtotal: ${0:N0} COP}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                            <TextBlock Text="{Binding Total, StringFormat=TOTAL: ${0:N0} COP}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}"/>
+                        </StackPanel>
+                        <Button Grid.Column="4" Content="Limpiar" Command="{Binding LimpiarCommand}" FontSize="11" Padding="10,6" VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Lista de mercancías recibidas hoy -->
+        <Border Grid.Row="2" Style="{StaticResource CardStyle}" Padding="15">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="MERCANCÍA RECIBIDA HOY" FontSize="12" Foreground="{DynamicResource TextMutedBrush}" FontWeight="Medium" Margin="0,0,0,10"/>
+
+                <DataGrid Grid.Row="1" ItemsSource="{Binding MercanciasHoyPaged.Items}" 
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          CanUserSortColumns="True"
+                          EnableRowVirtualization="True"
+                          EnableColumnVirtualization="True"
+                          BorderThickness="0"
+                          Background="Transparent"
+                          RowBackground="{DynamicResource CardBackgroundBrush}"
+                          AlternatingRowBackground="{DynamicResource CardAlternateRowBrush}"
+                          GridLinesVisibility="None"
+                          HeadersVisibility="Column"
+                          CanUserResizeRows="False"
+                          FontSize="14"
+                          RowHeight="36">
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Foreground" Value="#999999"/>
+                            <Setter Property="FontWeight" Value="Medium"/>
+                            <Setter Property="FontSize" Value="12"/>
+                            <Setter Property="Padding" Value="10,8"/>
+                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                            <Setter Property="BorderBrush" Value="#E8E8E8"/>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Padding" Value="10,6"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Foreground" Value="#333333"/>
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                        </Style>
+                    </DataGrid.CellStyle>
+                    <DataGrid.Columns>
+                        <!-- HORA usa SortMemberPath=Fecha para ordenar por instante real,
+                             no por la cadena HH:mm (que rompe entre días distintos).
+                             CANTIDAD ordena por la propiedad numérica, no por la cadena
+                             formateada. -->
+                        <DataGridTextColumn Header="HORA"
+                                            Binding="{Binding Fecha, StringFormat=HH:mm}"
+                                            SortMemberPath="Fecha" Width="70"/>
+                        <DataGridTextColumn Header="INGREDIENTE"
+                                            Binding="{Binding Ingrediente.Nombre}"
+                                            SortMemberPath="Ingrediente.Nombre" Width="*"/>
+                        <DataGridTextColumn Header="CANTIDAD"
+                                            Binding="{Binding Cantidad, StringFormat=N2}"
+                                            SortMemberPath="Cantidad" Width="90"/>
+                        <DataGridTextColumn Header="PROVEEDOR"
+                                            Binding="{Binding Proveedor}"
+                                            SortMemberPath="Proveedor" Width="130"/>
+                        <DataGridTextColumn Header="FACTURA"
+                                            Binding="{Binding NumeroFactura}"
+                                            SortMemberPath="NumeroFactura" Width="110"/>
+                        <!-- Ordenar por la ruta del archivo o por botones no aporta,
+                             así que estas dos columnas template deshabilitan el sort. -->
+                        <DataGridTemplateColumn Header="ARCHIVO" Width="80" CanUserSort="False">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Content="📎 Ver"
+                                            Command="{Binding DataContext.AbrirFacturaCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}"
+                                            Padding="8,3" FontSize="12" Cursor="Hand"
+                                            Background="Transparent" Foreground="{DynamicResource AccentBrush}"
+                                            BorderBrush="{DynamicResource AccentBrush}" BorderThickness="1">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RutaFactura}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding RutaFactura}" Value="">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="ACCIONES" Width="270" CanUserSort="False">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Button Content="Editar"
+                                                Command="{Binding DataContext.EditarMercanciaCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"
+                                                Padding="10,4" FontSize="12" Margin="0,0,6,0" Cursor="Hand"
+                                                BorderThickness="1" BorderBrush="{DynamicResource DividerBrush}"
+                                                Background="Transparent"
+                                                Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                        <Button Content="→ Bodega"
+                                                ToolTip="Agregar esta mercancía a la pantalla Bodega"
+                                                Command="{Binding DataContext.AgregarABodegaCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"
+                                                Padding="10,4" FontSize="12" Margin="0,0,6,0" Cursor="Hand"
+                                                BorderThickness="0" Background="#6D4C41"
+                                                Foreground="White"/>
+                                        <Button Content="Remover"
+                                                Command="{Binding DataContext.RemoverMercanciaCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                                CommandParameter="{Binding}"
+                                                Padding="10,4" FontSize="12" Cursor="Hand"
+                                                BorderThickness="1" BorderBrush="#C62828"
+                                                Background="Transparent"
+                                                Foreground="#C62828"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <common:PaginatorBar Grid.Row="2" DataContext="{Binding MercanciasHoyPaged}"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

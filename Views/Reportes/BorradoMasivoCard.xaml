@@ -1,0 +1,82 @@
+<UserControl x:Class="ValeriosPizza.Views.Reportes.BorradoMasivoCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="220" d:DesignWidth="1000">
+    <Border Style="{StaticResource CardStyle}" Padding="20"
+            BorderBrush="#C62828" BorderThickness="1">
+        <StackPanel>
+            <TextBlock Text="🗑  BORRAR DATOS DE LA BASE DE DATOS"
+                       FontSize="12" Foreground="#C62828" FontWeight="Bold"/>
+            <TextBlock FontSize="13" Foreground="#555" Margin="0,8,0,12" TextWrapping="Wrap">
+                <Run Text="Zona peligrosa."/>
+                <Run Text="Esta operación elimina registros de forma permanente y no se puede deshacer."/>
+                <Run Text="Se recomienda exportar la base de datos antes de continuar."/>
+            </TextBlock>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Text="Alcance del borrado"
+                               FontSize="11" Foreground="{DynamicResource TextMutedBrush}"
+                               Margin="0,0,0,4"/>
+                    <ComboBox Width="280"
+                              ItemsSource="{Binding AlcancesBorrado}"
+                              SelectedItem="{Binding AlcanceBorradoSeleccionado}"
+                              Padding="8,6" FontSize="13"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal"
+                            VerticalAlignment="Center" Margin="20,18,0,0"
+                            Visibility="{Binding MostrarRangoBorrado, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <StackPanel Margin="0,0,12,0">
+                        <TextBlock Text="Desde (fecha)"
+                                   FontSize="11" Foreground="{DynamicResource TextMutedBrush}"
+                                   Margin="0,0,0,4"/>
+                        <DatePicker SelectedDate="{Binding BorradoDesde}"
+                                    Width="140" FontSize="13"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,12,0">
+                        <TextBlock Text="Hora desde (HH:mm)"
+                                   FontSize="11" Foreground="{DynamicResource TextMutedBrush}"
+                                   Margin="0,0,0,4"/>
+                        <TextBox Text="{Binding BorradoDesde, StringFormat=HH:mm, UpdateSourceTrigger=LostFocus}"
+                                 Width="80" FontSize="13" Padding="6,4"/>
+                    </StackPanel>
+                    <StackPanel Margin="0,0,12,0">
+                        <TextBlock Text="Hasta (fecha)"
+                                   FontSize="11" Foreground="{DynamicResource TextMutedBrush}"
+                                   Margin="0,0,0,4"/>
+                        <DatePicker SelectedDate="{Binding BorradoHasta}"
+                                    Width="140" FontSize="13"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock Text="Hora hasta (HH:mm)"
+                                   FontSize="11" Foreground="{DynamicResource TextMutedBrush}"
+                                   Margin="0,0,0,4"/>
+                        <TextBox Text="{Binding BorradoHasta, StringFormat=HH:mm, UpdateSourceTrigger=LostFocus}"
+                                 Width="80" FontSize="13" Padding="6,4"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <Button Grid.Column="2" Content="🗑  BORRAR"
+                        Command="{Binding BorrarDatosCommand}"
+                        VerticalAlignment="Bottom"
+                        Padding="22,10" FontSize="13" FontWeight="Bold"
+                        Cursor="Hand" Margin="20,0,0,0"
+                        Background="#C62828" Foreground="White" BorderThickness="0"/>
+            </Grid>
+
+            <TextBlock Text="{Binding MensajeBorrado}"
+                       FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
+                       Margin="0,12,0,0" TextWrapping="Wrap"/>
+        </StackPanel>
+    </Border>
+</UserControl>

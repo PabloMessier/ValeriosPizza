@@ -1,0 +1,75 @@
+<UserControl x:Class="ValeriosPizza.Views.Inventario.EstadoDelDiaCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="200" d:DesignWidth="1000">
+    <Border Style="{StaticResource CardStyle}" Padding="15">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0" Text="ESTADO DEL DÍA" FontSize="12" Foreground="{DynamicResource TextMutedBrush}" FontWeight="Medium" Margin="0,0,0,10"/>
+
+            <StackPanel Grid.Row="1" Orientation="Horizontal">
+                <Border Background="#E3F2FD" Padding="14,10" CornerRadius="4" Margin="0,0,10,0">
+                    <StackPanel>
+                        <TextBlock Text="INVENTARIO APERTURA" FontSize="11" Foreground="#1976D2" FontWeight="Medium"/>
+                        <TextBlock Text="{Binding AperturaHoyTexto}" FontSize="14" Foreground="#1976D2" Margin="0,3,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="#F3E5F5" Padding="14,10" CornerRadius="4">
+                    <StackPanel>
+                        <TextBlock Text="INVENTARIO CIERRE" FontSize="11" Foreground="#7B1FA2" FontWeight="Medium"/>
+                        <TextBlock Text="{Binding CierreHoyTexto}" FontSize="14" Foreground="#7B1FA2" Margin="0,3,0,0"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- Calculadora COP del Inventario (helper de UI, no se persiste en BD) -->
+            <Border Grid.Row="2" BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,1,0,0"
+                    Margin="0,15,0,0" Padding="0,12,0,0"
+                    DataContext="{Binding CalcInventario}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="CALCULADORA COP" FontSize="11" FontWeight="Bold"
+                               Foreground="{DynamicResource TextMutedBrush}"
+                               VerticalAlignment="Center" Margin="0,0,16,0"/>
+                    <StackPanel Grid.Column="1" Margin="4,0,4,0">
+                        <TextBlock Text="CANTIDAD" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}"/>
+                        <TextBox Text="{Binding Cantidad, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}" FontSize="13" Padding="6,4" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Margin="4,0,4,0">
+                        <TextBlock Text="PRECIO UNIT." FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}"/>
+                        <TextBox Text="{Binding PrecioUnitario, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}" FontSize="13" Padding="6,4" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="3" Margin="4,0,4,0">
+                        <TextBlock Text="IMPUESTO" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}"/>
+                        <TextBox Text="{Binding Impuesto, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}" FontSize="13" Padding="6,4" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="4" Margin="4,0,4,0">
+                        <TextBlock Text="RETENCIÓN" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}"/>
+                        <TextBox Text="{Binding Retencion, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}" FontSize="13" Padding="6,4" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="5" Margin="12,0,4,0" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Subtotal, StringFormat=Subtotal: ${0:N0} COP}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock Text="{Binding Total, StringFormat=TOTAL: ${0:N0} COP}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}"/>
+                    </StackPanel>
+                    <Button Grid.Column="6" Content="Limpiar" Command="{Binding LimpiarCommand}" FontSize="11" Padding="10,6" VerticalAlignment="Center"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

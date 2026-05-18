@@ -1,0 +1,373 @@
+<Application x:Class="ValeriosPizza.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:ValeriosPizza"
+             xmlns:conv="clr-namespace:ValeriosPizza.Converters">
+    <!--
+         StartupUri se elimina a propósito: la ventana principal se construye
+         desde el contenedor de DI en App.OnStartup para que MainWindowViewModel
+         y sus VMs hijos reciban sus dependencias inyectadas.
+    -->
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Tema activo. Se reemplaza en tiempo de ejecución por ThemeManager. -->
+                <ResourceDictionary Source="Themes/LightTheme.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Converter para visibilidad -->
+            <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+
+            <!-- Converter para comparar dos valores (usado para resaltar el
+                 botón de navegación activo en el sidebar). -->
+            <conv:EqualsConverter x:Key="EqualsConverter"/>
+
+            <!-- Empaqueta los valores de un MultiBinding en object[]; lo usa
+                 InventarioView para enviar (ProductoDisplay, EstadoProducto)
+                 al comando único MarcarProducto. -->
+            <conv:MultiValueArrayConverter x:Key="MultiValueArrayConverter"/>
+
+            <!-- Formatea cantidad según la unidad: enteros para "unidades". -->
+            <conv:CantidadPorUnidadConverter x:Key="CantidadPorUnidadConverter"/>
+        
+        <!-- Paleta de colores minimalista -->
+        <Color x:Key="PrimaryDark">#1A1A1A</Color>
+        <Color x:Key="PrimaryGray">#333333</Color>
+        <Color x:Key="SecondaryGray">#666666</Color>
+        <Color x:Key="LightGray">#E8E8E8</Color>
+        <Color x:Key="BackgroundWhite">#FAFAFA</Color>
+        <Color x:Key="AccentBlue">#2563EB</Color>
+        
+        <SolidColorBrush x:Key="PrimaryDarkBrush" Color="{StaticResource PrimaryDark}"/>
+        <SolidColorBrush x:Key="PrimaryGrayBrush" Color="{StaticResource PrimaryGray}"/>
+        <SolidColorBrush x:Key="SecondaryGrayBrush" Color="{StaticResource SecondaryGray}"/>
+        <SolidColorBrush x:Key="LightGrayBrush" Color="{StaticResource LightGray}"/>
+        <SolidColorBrush x:Key="BackgroundWhiteBrush" Color="{StaticResource BackgroundWhite}"/>
+        <SolidColorBrush x:Key="AccentBlueBrush" Color="{StaticResource AccentBlue}"/>
+
+        <!-- Estilo Fluent (Windows 11) para botones de navegación. Indicador
+             de selección tipo "pill" a la izquierda y fondo redondeado al
+             pasar el mouse o cuando la sección está activa. -->
+        <Style x:Key="NavButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource SidebarMutedTextBrush}"/>
+            <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="Padding" Value="16,12"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="OuterBorder"
+                                Background="{TemplateBinding Background}"
+                                Margin="8,1"
+                                CornerRadius="4"
+                                SnapsToDevicePixels="True">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <!-- Indicador "pill" Fluent. Oculto por defecto;
+                                     se muestra cuando la sección está activa. -->
+                                <Rectangle x:Name="PillIndicator"
+                                           Grid.Column="0"
+                                           Width="3" Height="16"
+                                           Margin="4,0,4,0"
+                                           RadiusX="1.5" RadiusY="1.5"
+                                           Fill="{DynamicResource AccentBrush}"
+                                           Visibility="Collapsed"/>
+                                <ContentPresenter Grid.Column="1"
+                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  VerticalAlignment="Center"
+                                                  Margin="4,0,0,0"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <DataTrigger Value="True">
+                                <DataTrigger.Binding>
+                                    <MultiBinding Converter="{StaticResource EqualsConverter}">
+                                        <Binding Path="DataContext.CurrentView" RelativeSource="{RelativeSource AncestorType=Window}"/>
+                                        <Binding Path="Tag" RelativeSource="{RelativeSource Self}"/>
+                                    </MultiBinding>
+                                </DataTrigger.Binding>
+                                <Setter TargetName="PillIndicator" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="OuterBorder" Property="Background" Value="{DynamicResource SidebarPressedBrush}"/>
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource TextOnDarkBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource SidebarHoverBrush}"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource TextOnDarkBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource SidebarPressedBrush}"/>
+                </Trigger>
+                <DataTrigger Value="True">
+                    <DataTrigger.Binding>
+                        <MultiBinding Converter="{StaticResource EqualsConverter}">
+                            <Binding Path="DataContext.CurrentView" RelativeSource="{RelativeSource AncestorType=Window}"/>
+                            <Binding Path="Tag" RelativeSource="{RelativeSource Self}"/>
+                        </MultiBinding>
+                    </DataTrigger.Binding>
+                    <Setter Property="Foreground" Value="{DynamicResource TextOnDarkBrush}"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Botón prominente para Deshacer / Rehacer.
+             Diseñado para ser visible: fondo de acento sólido, tipografía
+             en negrita, esquinas redondeadas pronunciadas y un ligero halo
+             al pasar el mouse. Cuando está deshabilitado se atenúa pero
+             conserva el color para no desaparecer del encabezado. -->
+        <Style x:Key="UndoRedoButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="16,9"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="MinWidth" Value="120"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6"
+                                SnapsToDevicePixels="True">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#000000" Opacity="0.18" BlurRadius="8" ShadowDepth="1" Direction="270"/>
+                            </Border.Effect>
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.88"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.75"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Bd" Property="Opacity" Value="0.35"/>
+                                <Setter Property="Cursor" Value="Arrow"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Tarjetas Fluent: esquinas redondeadas (8px) y sombra muy sutil. -->
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
+            <Setter Property="Padding" Value="24"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="#000000" Opacity="0.06" BlurRadius="14" ShadowDepth="1" Direction="270"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Botón primario Fluent: usa el color de acento del tema, esquinas
+             redondeadas a 4px y borde muy fino para emular la elevación. -->
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource AccentTextBrush}"/>
+            <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="22,10"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentPressedBrush}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="PrimaryBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource AccentHoverBrush}"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource AccentPressedBrush}"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.45"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- TextBox Fluent: borde redondeado 4px, acento al enfocar. -->
+        <Style x:Key="ModernTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="SelectionBrush" Value="{DynamicResource AccentBrush}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4"
+                                SnapsToDevicePixels="True">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Padding="{TemplateBinding Padding}"
+                                          Focusable="False"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                <Setter TargetName="Bd" Property="BorderThickness" Value="1"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Estilo IMPLÍCITO para TextBox: garantiza Foreground/Background acordes
+             al tema en CUALQUIER TextBox sin estilo explícito. Background local
+             (p.ej. en RegistroRapidoView) sigue ganando, pero el Foreground se
+             hereda del tema y deja de ser negro fijo del default de Windows. -->
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="SelectionBrush" Value="{DynamicResource AccentBrush}"/>
+        </Style>
+
+        <!-- Estilo IMPLÍCITO para ComboBox: mismo motivo. -->
+        <Style TargetType="ComboBox">
+            <Setter Property="Background" Value="{DynamicResource InputBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"/>
+        </Style>
+
+        <!-- NOTA: NO usamos un estilo implícito para TextBlock porque sobreescribe
+             la herencia de Foreground dentro de Buttons (ContentPresenter genera
+             un TextBlock interno) y haría invisibles los textos de los botones
+             cuando el tema oscurece TextPrimaryBrush. La herencia natural de
+             TextElement.Foreground (definida en MainWindow) basta para los
+             TextBlock sin Foreground explícito. -->
+
+        <!-- Estilo IMPLÍCITO para DataGridColumnHeader: respeta el tema y
+             garantiza que las cabeceras (FECHA, TIPO, etc.) sean siempre
+             visibles en cualquier tema. -->
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="{DynamicResource DataGridHeaderBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource DataGridHeaderForegroundBrush}"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DataGridHeaderUnderlineBrush}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <!-- Estilo IMPLÍCITO para DataGridCell: hereda los colores del tema. -->
+        <Style TargetType="DataGridCell">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource DataGridCellForegroundBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource DataGridSelectedBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource DataGridSelectedForegroundBrush}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Estilo IMPLÍCITO para DataGridRow: limpia el highlight nativo y
+             garantiza el color de selección del tema. -->
+        <Style TargetType="DataGridRow">
+            <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
+        </Style>
+
+        <!-- Estilo IMPLÍCITO para Button: estilo "secundario" Fluent con
+             esquinas redondeadas y un hover sutil. Los botones con Style
+             explícito (PrimaryButtonStyle, NavButtonStyle, etc.) NO se ven
+             afectados, igual que los que fijan Background/Foreground en línea. -->
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource DividerBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="12,7"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SidebarHoverBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{DynamicResource SidebarPressedBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.45"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

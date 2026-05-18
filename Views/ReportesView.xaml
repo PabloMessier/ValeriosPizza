@@ -1,0 +1,38 @@
+<UserControl x:Class="ValeriosPizza.Views.ReportesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:rep="clr-namespace:ValeriosPizza.Views.Reportes"
+             mc:Ignorable="d"
+             d:DesignHeight="900" d:DesignWidth="1000"
+             Background="{DynamicResource WindowBackgroundBrush}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="20,15">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" Margin="0,0,0,15">
+                <TextBlock Text="Reportes" FontSize="26" FontWeight="Light" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                <TextBlock Text="Estadísticas y análisis del inventario" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,4,0,0"/>
+            </StackPanel>
+
+            <rep:FiltrosPeriodoCard          Grid.Row="1" Margin="0,0,0,15"/>
+            <rep:ExportarBarra               Grid.Row="2" Margin="0,0,0,15"/>
+            <rep:TotalesCards                Grid.Row="3" Margin="0,0,0,15"/>
+            <rep:EstadisticasYActividadCard  Grid.Row="4" Margin="0,0,0,15"/>
+            <rep:DetalleTablasCard           Grid.Row="5" Margin="0,0,0,15"/>
+            <rep:RespaldoCard                Grid.Row="6" Margin="0,0,0,15"/>
+            <!-- BorradoMasivoCard al final como zona peligrosa -->
+            <rep:BorradoMasivoCard           Grid.Row="7"/>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

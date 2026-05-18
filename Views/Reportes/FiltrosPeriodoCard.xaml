@@ -1,0 +1,43 @@
+<UserControl x:Class="ValeriosPizza.Views.Reportes.FiltrosPeriodoCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="120" d:DesignWidth="1000">
+    <Border Style="{StaticResource CardStyle}" Padding="15">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0" Text="SELECCIONAR PERÍODO" FontSize="12" Foreground="{DynamicResource TextMutedBrush}" FontWeight="Medium" Margin="0,0,0,12"/>
+
+            <StackPanel Grid.Row="1" Orientation="Horizontal">
+                <Button Content="ÚLTIMOS 7 DÍAS" Command="{Binding FiltrarUltimos7DiasCommand}"
+                        Padding="14,10" FontSize="12" Margin="0,0,8,0" Cursor="Hand"
+                        BorderThickness="1" BorderBrush="{DynamicResource DividerBrush}"/>
+                <Button Content="ÚLTIMOS 30 DÍAS" Command="{Binding FiltrarUltimos30DiasCommand}"
+                        Padding="14,10" FontSize="12" Margin="0,0,8,0" Cursor="Hand"
+                        BorderThickness="1" BorderBrush="{DynamicResource DividerBrush}"/>
+                <Button Content="ESTE MES" Command="{Binding FiltrarEsteMesCommand}"
+                        Padding="14,10" FontSize="12" Margin="0,0,8,0" Cursor="Hand"
+                        Background="{DynamicResource AccentBrush}" Foreground="White" BorderThickness="0"/>
+                <Button Content="MES ANTERIOR" Command="{Binding FiltrarMesAnteriorCommand}"
+                        Padding="14,10" FontSize="12" Margin="0,0,20,0" Cursor="Hand"
+                        BorderThickness="1" BorderBrush="{DynamicResource DividerBrush}"/>
+
+                <Border Width="1" Background="#E0E0E0" Margin="0,0,20,0"/>
+
+                <TextBlock Text="Desde:" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <DatePicker SelectedDate="{Binding FechaInicio}" FontSize="12" Width="120" Margin="0,0,15,0"/>
+                <TextBlock Text="Hasta:" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <DatePicker SelectedDate="{Binding FechaFin}" FontSize="12" Width="120" Margin="0,0,15,0"/>
+                <Button Content="GENERAR" Command="{Binding BuscarPorFechasCommand}"
+                        Padding="20,10" FontSize="12" Cursor="Hand"
+                        Background="#2196F3" Foreground="White" BorderThickness="0"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

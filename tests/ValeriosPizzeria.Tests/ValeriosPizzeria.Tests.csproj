@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!--
+      Mismo TFM que el proyecto principal porque ese ensamblado se compila
+      como WPF (net8.0-windows + UseWPF). NO activamos UseWPF aquí: el
+      proyecto de pruebas sólo referencia el .dll ya compilado y no necesita
+      generar el wpftmp ni los AssemblyInfo de WPF, lo que evitaba duplicar
+      atributos al compilar.
+    -->
+    <TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Espacio de nombres raíz independiente del nombre del csproj. -->
+    <RootNamespace>ValeriosPizza.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\ValeriosPizzeria.csproj" />
+  </ItemGroup>
+
+</Project>

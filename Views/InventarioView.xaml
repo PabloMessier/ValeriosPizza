@@ -1,0 +1,57 @@
+<UserControl x:Class="ValeriosPizza.Views.InventarioView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:inv="clr-namespace:ValeriosPizza.Views.Inventario"
+             mc:Ignorable="d"
+             d:DesignHeight="900" d:DesignWidth="1000"
+             Background="{DynamicResource WindowBackgroundBrush}">
+    <ScrollViewer x:Name="PageScrollViewer" VerticalScrollBarVisibility="Auto">
+        <Grid Margin="20,15">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" Margin="0,0,0,15">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Seguimiento de Inventario" FontSize="26" FontWeight="Light" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBlock Text="{Binding SemanaActual}" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,4,0,0"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Command="{Binding DataContext.DeshacerCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                            ToolTip="{Binding DataContext.UndoRedo.DescripcionProximoDeshacer, RelativeSource={RelativeSource AncestorType=Window}, StringFormat='Deshacer: {0}', FallbackValue='Deshacer (Ctrl+Z)'}"
+                            Style="{StaticResource UndoRedoButtonStyle}" Margin="0,0,10,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="↶" FontSize="18" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="DESHACER" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Command="{Binding DataContext.RehacerCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                            ToolTip="{Binding DataContext.UndoRedo.DescripcionProximoRehacer, RelativeSource={RelativeSource AncestorType=Window}, StringFormat='Rehacer: {0}', FallbackValue='Rehacer (Ctrl+Y)'}"
+                            Style="{StaticResource UndoRedoButtonStyle}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="↷" FontSize="18" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="REHACER" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <inv:EstadoDelDiaCard          Grid.Row="1" Margin="0,0,0,15"/>
+            <inv:ResumenSemanalCard        Grid.Row="2" Margin="0,0,0,15"/>
+            <inv:FiltrosYTotalesCard       Grid.Row="3" Margin="0,0,0,15"/>
+            <inv:HistorialMovimientosCard  Grid.Row="4" Margin="0,0,0,15"/>
+            <inv:InventarioTabs            Grid.Row="5"/>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

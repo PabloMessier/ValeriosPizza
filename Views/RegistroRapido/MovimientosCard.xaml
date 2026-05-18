@@ -1,0 +1,145 @@
+<UserControl x:Class="ValeriosPizza.Views.RegistroRapido.MovimientosCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="320" d:DesignWidth="1000">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0" Style="{StaticResource CardStyle}" Margin="0,0,5,0" Padding="12">
+            <StackPanel>
+                <TextBlock Text="GASTO" FontSize="13" Foreground="#2196F3" FontWeight="Bold" Margin="0,0,0,8"/>
+                <TextBlock Text="Ingrediente" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,2"/>
+                <ComboBox ItemsSource="{Binding Ingredientes}" SelectedItem="{Binding GastoIngredienteSeleccionado}"
+                          DisplayMemberPath="Nombre" Padding="8,6" FontSize="13" Margin="0,0,0,6"/>
+                <TextBlock Text="Cantidad" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,2"/>
+                <TextBox Text="{Binding GastoCantidad, UpdateSourceTrigger=PropertyChanged}" Padding="8,6" FontSize="13" Margin="0,0,0,6"/>
+                <TextBlock Text="Descripción" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,2"/>
+                <TextBox Text="{Binding GastoDescripcion, UpdateSourceTrigger=PropertyChanged}" Padding="8,6" FontSize="13" Height="50" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                <Button Content="GUARDAR" Command="{Binding GuardarGastoCommand}"
+                        Background="#2196F3" Foreground="White" Padding="12,8" FontSize="12" BorderThickness="0" Cursor="Hand" HorizontalAlignment="Stretch"/>
+
+                <Border BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,1,0,0" Margin="0,10,0,0" Padding="0,8,0,0"
+                        DataContext="{Binding CalcGasto}">
+                    <StackPanel>
+                        <TextBlock Text="CALCULADORA COP" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,0,4"/>
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,3,0">
+                                <TextBlock Text="Precio unit." FontSize="10" Foreground="{DynamicResource TextMutedBrush}"/>
+                                <TextBox Text="{Binding PrecioUnitario, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}" FontSize="12" Padding="6,3"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="3,0,3,0">
+                                <TextBlock Text="Impuesto" FontSize="10" Foreground="{DynamicResource TextMutedBrush}"/>
+                                <TextBox Text="{Binding Impuesto, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}" FontSize="12" Padding="6,3"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Margin="3,0,0,0">
+                                <TextBlock Text="Retención" FontSize="10" Foreground="{DynamicResource TextMutedBrush}"/>
+                                <TextBox Text="{Binding Retencion, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}" FontSize="12" Padding="6,3"/>
+                            </StackPanel>
+                        </Grid>
+                        <TextBlock Text="{Binding Subtotal, StringFormat=Subtotal: ${0:N0} COP}" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock Text="{Binding Total, StringFormat=TOTAL: ${0:N0} COP}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Column="1" Style="{StaticResource CardStyle}" Margin="5,0,5,0" Padding="12">
+            <StackPanel>
+                <TextBlock Text="MERMA" FontSize="13" Foreground="#FF9800" FontWeight="Bold" Margin="0,0,0,8"/>
+                <TextBlock Text="Ingrediente" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,2"/>
+                <ComboBox ItemsSource="{Binding Ingredientes}" SelectedItem="{Binding MermaIngredienteSeleccionado}"
+                          DisplayMemberPath="Nombre" Padding="8,6" FontSize="13" Margin="0,0,0,6"/>
+                <TextBlock Text="Cantidad" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,2"/>
+                <TextBox Text="{Binding MermaCantidad, UpdateSourceTrigger=PropertyChanged}" Padding="8,6" FontSize="13" Margin="0,0,0,6"/>
+                <TextBlock Text="Motivo" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,2"/>
+                <TextBox Text="{Binding MermaMotivo, UpdateSourceTrigger=PropertyChanged}" Padding="8,6" FontSize="13" Height="50" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                <Button Content="GUARDAR" Command="{Binding GuardarMermaCommand}"
+                        Background="#FF9800" Foreground="White" Padding="12,8" FontSize="12" BorderThickness="0" Cursor="Hand" HorizontalAlignment="Stretch"/>
+
+                <Border BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,1,0,0" Margin="0,10,0,0" Padding="0,8,0,0"
+                        DataContext="{Binding CalcMerma}">
+                    <StackPanel>
+                        <TextBlock Text="CALCULADORA COP" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,0,4"/>
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,3,0">
+                                <TextBlock Text="Precio unit." FontSize="10" Foreground="{DynamicResource TextMutedBrush}"/>
+                                <TextBox Text="{Binding PrecioUnitario, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}" FontSize="12" Padding="6,3"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="3,0,3,0">
+                                <TextBlock Text="Impuesto" FontSize="10" Foreground="{DynamicResource TextMutedBrush}"/>
+                                <TextBox Text="{Binding Impuesto, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}" FontSize="12" Padding="6,3"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Margin="3,0,0,0">
+                                <TextBlock Text="Retención" FontSize="10" Foreground="{DynamicResource TextMutedBrush}"/>
+                                <TextBox Text="{Binding Retencion, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}" FontSize="12" Padding="6,3"/>
+                            </StackPanel>
+                        </Grid>
+                        <TextBlock Text="{Binding Subtotal, StringFormat=Subtotal: ${0:N0} COP}" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock Text="{Binding Total, StringFormat=TOTAL: ${0:N0} COP}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Column="2" Style="{StaticResource CardStyle}" Margin="5,0,0,0" Padding="12">
+            <StackPanel>
+                <TextBlock Text="CORTESÍA" FontSize="13" Foreground="#9C27B0" FontWeight="Bold" Margin="0,0,0,8"/>
+                <TextBlock Text="Producto" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,2"/>
+                <!-- Combo + botón "+" para crear un producto sobre la marcha si
+                     no existe todavía en el menú. Al guardar el diálogo, el
+                     VM lo deja preseleccionado en este combo. -->
+                <Grid Margin="0,0,0,6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <ComboBox Grid.Column="0" ItemsSource="{Binding Productos}" SelectedItem="{Binding CortesiaProductoSeleccionado}"
+                              DisplayMemberPath="Nombre" Padding="8,6" FontSize="13"/>
+                    <Button Grid.Column="1" Content="+" Command="{Binding AgregarProductoCortesiaCommand}"
+                            ToolTip="Crear nuevo producto"
+                            Width="30" Padding="0" FontSize="14" FontWeight="Bold" Margin="4,0,0,0" Cursor="Hand"
+                            Background="#9C27B0" Foreground="White" BorderThickness="0"/>
+                </Grid>
+                <TextBlock Text="Cantidad" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,2"/>
+                <TextBox Text="{Binding CortesiaCantidad, UpdateSourceTrigger=PropertyChanged}" Padding="8,6" FontSize="13" Margin="0,0,0,6"/>
+                <TextBlock Text="Motivo" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,2"/>
+                <TextBox Text="{Binding CortesiaMotivo, UpdateSourceTrigger=PropertyChanged}" Padding="8,6" FontSize="13" Height="50" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                <Button Content="GUARDAR" Command="{Binding GuardarCortesiaCommand}"
+                        Background="#9C27B0" Foreground="White" Padding="12,8" FontSize="12" BorderThickness="0" Cursor="Hand" HorizontalAlignment="Stretch"/>
+
+                <Border BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,1,0,0" Margin="0,10,0,0" Padding="0,8,0,0"
+                        DataContext="{Binding CalcCortesia}">
+                    <StackPanel>
+                        <TextBlock Text="CALCULADORA COP" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" Margin="0,0,0,4"/>
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="0,0,3,0">
+                                <TextBlock Text="Precio unit." FontSize="10" Foreground="{DynamicResource TextMutedBrush}"/>
+                                <TextBox Text="{Binding PrecioUnitario, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}" FontSize="12" Padding="6,3"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="3,0,3,0">
+                                <TextBlock Text="Impuesto" FontSize="10" Foreground="{DynamicResource TextMutedBrush}"/>
+                                <TextBox Text="{Binding Impuesto, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}" FontSize="12" Padding="6,3"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Margin="3,0,0,0">
+                                <TextBlock Text="Retención" FontSize="10" Foreground="{DynamicResource TextMutedBrush}"/>
+                                <TextBox Text="{Binding Retencion, UpdateSourceTrigger=PropertyChanged, StringFormat=N0}" FontSize="12" Padding="6,3"/>
+                            </StackPanel>
+                        </Grid>
+                        <TextBlock Text="{Binding Subtotal, StringFormat=Subtotal: ${0:N0} COP}" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                        <TextBlock Text="{Binding Total, StringFormat=TOTAL: ${0:N0} COP}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AccentBrush}"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

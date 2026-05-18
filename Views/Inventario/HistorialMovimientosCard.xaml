@@ -1,0 +1,41 @@
+<UserControl x:Class="ValeriosPizza.Views.Inventario.HistorialMovimientosCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:common="clr-namespace:ValeriosPizza.Views.Common"
+             mc:Ignorable="d"
+             d:DesignHeight="360" d:DesignWidth="1000">
+    <Border Style="{StaticResource CardStyle}" Padding="15">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto" MaxHeight="320"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Text="HISTORIAL DE MOVIMIENTOS" FontSize="12" Foreground="{DynamicResource TextMutedBrush}" FontWeight="Medium" Margin="0,0,0,10"/>
+            <DataGrid Grid.Row="1" ItemsSource="{Binding MovimientosPaged.Items}"
+                      AutoGenerateColumns="False" IsReadOnly="True"
+                      EnableRowVirtualization="True" EnableColumnVirtualization="True"
+                      BorderThickness="0" Background="Transparent"
+                      RowBackground="{DynamicResource CardBackgroundBrush}" AlternatingRowBackground="{DynamicResource CardAlternateRowBrush}"
+                      GridLinesVisibility="None" HeadersVisibility="Column"
+                      CanUserResizeRows="False" FontSize="13" RowHeight="36" MaxHeight="300">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="FECHA" Binding="{Binding Fecha, StringFormat=dd/MM HH:mm}" Width="100"/>
+                    <DataGridTemplateColumn Header="TIPO" Width="100">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Tipo}" Foreground="{Binding ColorTipo}" FontWeight="Medium" FontSize="11"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="DESCRIPCIÓN" Binding="{Binding Descripcion}" Width="*"/>
+                    <DataGridTextColumn Header="CANTIDAD" Binding="{Binding Cantidad}" Width="140"/>
+                    <DataGridTextColumn Header="DETALLES" Binding="{Binding Detalles}" Width="220"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <common:PaginatorBar Grid.Row="2" DataContext="{Binding MovimientosPaged}"/>
+        </Grid>
+    </Border>
+</UserControl>

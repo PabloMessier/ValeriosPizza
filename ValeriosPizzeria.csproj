@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <!--
+      Anclado a Windows 10 1809 (build 17763) o superior, línea oficialmente
+      soportada por .NET 8 + WPF. La versión de la plataforma se infiere del
+      TFM, por eso ya no es necesario un <SupportedOSPlatformVersion> aparte.
+    -->
+    <TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Espacio de nombres raíz del código C# (independiente del nombre del assembly/csproj). -->
+    <RootNamespace>ValeriosPizza</RootNamespace>
+    <UseWPF>true</UseWPF>
+    <PlatformTarget>x64</PlatformTarget>
+    <RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
+    <!-- Ícono del ejecutable compilado (visible en el Explorador de Windows y en la barra de tareas). -->
+    <ApplicationIcon>Assets\logo.ico</ApplicationIcon>
+    <!-- Calidad del código. -->
+    <AnalysisMode>Recommended</AnalysisMode>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.104.2" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.11" />
+    <!-- Generic Host + DI; usado en App.xaml.cs como composición raiz. -->
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3912.50" />
+    <PackageReference Include="QuestPDF" Version="2024.12.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\logo.png" />
+    <Resource Include="Assets\logo.ico" />
+  </ItemGroup>
+
+  <!--
+    El SDK incluye automáticamente todos los .cs/.xaml bajo la raíz del proyecto.
+    Excluimos explícitamente la carpeta tests\ para que el ensamblado de la app
+    no intente compilar los archivos del proyecto de pruebas (que dependen de
+    Xunit y de un proyecto distinto).
+  -->
+  <ItemGroup>
+    <Compile Remove="tests\**\*.*" />
+    <None Remove="tests\**\*.*" />
+    <EmbeddedResource Remove="tests\**\*.*" />
+    <Page Remove="tests\**\*.*" />
+    <ApplicationDefinition Remove="tests\**\*.*" />
+    <Resource Remove="tests\**\*.*" />
+  </ItemGroup>
+
+</Project>
