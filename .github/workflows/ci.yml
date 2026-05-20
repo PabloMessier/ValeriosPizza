@@ -1,0 +1,51 @@
+# CI para Valerio's Pizzeria — compila la app WPF y ejecuta los tests xUnit.
+# Se ejecuta en push a main y en cada PR.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-test:
+    name: Build & Test
+    # WPF requiere Windows; la TFM net8.0-windows10.0.17763.0 no compila
+    # en linux/macos.
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: ${{ runner.os }}-nuget-
+
+      - name: Restore
+        run: dotnet restore ValeriosPizzeria.sln
+
+      - name: Build (Release, no restore)
+        run: dotnet build ValeriosPizzeria.sln -c Release --no-restore --nologo
+
+      - name: Test
+        run: >-
+          dotnet test tests/ValeriosPizzeria.Tests/ValeriosPizzeria.Tests.csproj
+          -c Release --no-build --nologo
+          --logger "trx;LogFileName=test-results.trx"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: '**/test-results.trx'

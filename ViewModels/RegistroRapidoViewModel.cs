@@ -371,7 +371,7 @@ public partial class RegistroRapidoViewModel : ViewModelBase
     [RelayCommand]
     private void AgregarProductoCortesia()
     {
-        var dialog = ProductoDialog.ParaCrear();
+        var dialog = ProductoDialog.ParaCrear(_dbFactory);
         dialog.Owner = Application.Current?.MainWindow;
         if (dialog.ShowDialog() == true && dialog.ProductoResultante != null)
         {
@@ -599,7 +599,7 @@ public partial class RegistroRapidoViewModel : ViewModelBase
 
     private void AbrirDialogoYAgregar(ObservableCollection<ConteoLineaVM> lineas)
     {
-        var dialog = IngredienteDialog.ParaCrear();
+        var dialog = IngredienteDialog.ParaCrear(_dbFactory);
         dialog.Owner = Application.Current?.MainWindow;
         if (dialog.ShowDialog() == true && dialog.IngredienteResultante != null)
         {

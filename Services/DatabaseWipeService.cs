@@ -86,10 +86,13 @@ public static class DatabaseWipeService
     /// Usa <c>ExecuteDelete</c> (EF Core 7+) para evitar materializar entidades en
     /// memoria y agrupa todo en una transacción para que el borrado sea atómico.
     /// </summary>
-    public static ResultadoBorrado BorrarPorRango(DateTime inicio, DateTime fin)
+    public static ResultadoBorrado BorrarPorRango(
+        DateTime inicio,
+        DateTime fin,
+        IDbContextFactory<PizzeriaDbContext> dbFactory)
     {
         var resultado = new ResultadoBorrado();
-        using var db = new PizzeriaDbContext();
+        using var db = dbFactory.CreateDbContext();
         using var tx = db.Database.BeginTransaction();
 
         // 1. Eliminar primero las dependencias (líneas de conteo) por FK,
@@ -127,10 +130,10 @@ public static class DatabaseWipeService
     /// Usa <c>ExecuteDelete</c> dentro de una transacción para minimizar memoria
     /// y garantizar atomicidad.
     /// </summary>
-    public static ResultadoBorrado BorrarTodo()
+    public static ResultadoBorrado BorrarTodo(IDbContextFactory<PizzeriaDbContext> dbFactory)
     {
         var resultado = new ResultadoBorrado();
-        using var db = new PizzeriaDbContext();
+        using var db = dbFactory.CreateDbContext();
         using var tx = db.Database.BeginTransaction();
 
         // Orden importa: hijos antes que padres para no violar FKs.

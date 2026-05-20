@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
@@ -16,9 +18,21 @@ namespace ValeriosPizza.Services;
 /// <summary>
 /// Genera reportes en CSV, Excel (xlsx) y PDF a partir de los datos del rango
 /// indicado. Los archivos se guardan en la carpeta de Reportes del usuario.
+///
+/// Se inyecta vía DI con <see cref="IDbContextFactory{PizzeriaDbContext}"/>
+/// para que las consultas usen la misma cadena de conexión configurada en
+/// <c>App.xaml.cs</c> (en lugar de instanciar el DbContext con su ruta por
+/// defecto).
 /// </summary>
-public static class ExportService
+public class ExportService
 {
+    private readonly IDbContextFactory<PizzeriaDbContext> _dbFactory;
+
+    public ExportService(IDbContextFactory<PizzeriaDbContext> dbFactory)
+    {
+        _dbFactory = dbFactory;
+    }
+
     public static string CarpetaReportes
     {
         get
@@ -60,7 +74,10 @@ public static class ExportService
         public List<BodegaItem> Bodega { get; set; } = new();
     }
 
-    public static DatosReporte CargarDatos(DateTime inicio, DateTime fin)
+    public async Task<DatosReporte> CargarDatosAsync(
+        DateTime inicio,
+        DateTime fin,
+        CancellationToken ct = default)
     {
         // Normalizamos el rango a [inicio_dia, fin_exclusivo) para evitar
         // problemas de precisión con DateTime al final del día. Si el llamador
@@ -70,40 +87,41 @@ public static class ExportService
         var finExclusivo = fin.TimeOfDay == TimeSpan.Zero
             ? fin.Date.AddDays(1)
             : fin;
-        using var db = new PizzeriaDbContext();
+        await using var db = await _dbFactory.CreateDbContextAsync(ct);
 
+        // AsNoTracking() porque estos datos solo se serializan; no se mutan.
         return new DatosReporte
         {
             Inicio = inicio,
             Fin = fin,
-            Entradas = db.Entradas.Include(e => e.Ingrediente)
+            Entradas = await db.Entradas.AsNoTracking().Include(e => e.Ingrediente)
                 .Where(e => e.Fecha >= inicioDia && e.Fecha < finExclusivo)
-                .OrderBy(e => e.Fecha).ToList(),
-            Gastos = db.Gastos.Include(g => g.Ingrediente)
+                .OrderBy(e => e.Fecha).ToListAsync(ct),
+            Gastos = await db.Gastos.AsNoTracking().Include(g => g.Ingrediente)
                 .Where(g => g.Fecha >= inicioDia && g.Fecha < finExclusivo)
-                .OrderBy(g => g.Fecha).ToList(),
-            Mermas = db.Mermas.Include(m => m.Ingrediente)
+                .OrderBy(g => g.Fecha).ToListAsync(ct),
+            Mermas = await db.Mermas.AsNoTracking().Include(m => m.Ingrediente)
                 .Where(m => m.Fecha >= inicioDia && m.Fecha < finExclusivo)
-                .OrderBy(m => m.Fecha).ToList(),
-            Cortesias = db.Cortesias.Include(c => c.Producto)
+                .OrderBy(m => m.Fecha).ToListAsync(ct),
+            Cortesias = await db.Cortesias.AsNoTracking().Include(c => c.Producto)
                 .Where(c => c.Fecha >= inicioDia && c.Fecha < finExclusivo)
-                .OrderBy(c => c.Fecha).ToList(),
-            Mercancias = db.MercanciasRecibidas.Include(m => m.Ingrediente)
+                .OrderBy(c => c.Fecha).ToListAsync(ct),
+            Mercancias = await db.MercanciasRecibidas.AsNoTracking().Include(m => m.Ingrediente)
                 .Where(m => m.Fecha >= inicioDia && m.Fecha < finExclusivo)
-                .OrderBy(m => m.Fecha).ToList(),
-            Discos = db.InventarioDiscos
+                .OrderBy(m => m.Fecha).ToListAsync(ct),
+            Discos = await db.InventarioDiscos.AsNoTracking()
                 .Where(d => d.Fecha >= inicioDia && d.Fecha < finExclusivo)
-                .OrderBy(d => d.Fecha).ToList(),
-            Cajas = db.InventarioCajas
+                .OrderBy(d => d.Fecha).ToListAsync(ct),
+            Cajas = await db.InventarioCajas.AsNoTracking()
                 .Where(c => c.Fecha >= inicioDia && c.Fecha < finExclusivo)
-                .OrderBy(c => c.Fecha).ToList(),
-            Conteos = db.ConteosInventario
+                .OrderBy(c => c.Fecha).ToListAsync(ct),
+            Conteos = await db.ConteosInventario.AsNoTracking()
                 .Include(c => c.Lineas).ThenInclude(l => l.Ingrediente)
                 .Where(c => c.Fecha >= inicioDia && c.Fecha < finExclusivo)
-                .OrderBy(c => c.Fecha).ToList(),
-            Bodega = db.BodegaItems
+                .OrderBy(c => c.Fecha).ToListAsync(ct),
+            Bodega = await db.BodegaItems.AsNoTracking()
                 .Where(b => b.FechaAgregado >= inicioDia && b.FechaAgregado < finExclusivo)
-                .OrderBy(b => b.FechaAgregado).ToList()
+                .OrderBy(b => b.FechaAgregado).ToListAsync(ct)
         };
     }
 

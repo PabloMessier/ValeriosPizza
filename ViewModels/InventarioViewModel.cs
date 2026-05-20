@@ -218,7 +218,7 @@ public partial class InventarioViewModel : ViewModelBase
     [RelayCommand]
     private void AgregarIngrediente()
     {
-        var dialog = IngredienteDialog.ParaCrear();
+        var dialog = IngredienteDialog.ParaCrear(_dbFactory);
         dialog.Owner = Application.Current?.MainWindow;
         if (dialog.ShowDialog() == true)
         {
@@ -235,7 +235,7 @@ public partial class InventarioViewModel : ViewModelBase
     [RelayCommand]
     private void AgregarProducto()
     {
-        var dialog = ProductoDialog.ParaCrear();
+        var dialog = ProductoDialog.ParaCrear(_dbFactory);
         dialog.Owner = Application.Current?.MainWindow;
         if (dialog.ShowDialog() == true)
         {
@@ -248,7 +248,7 @@ public partial class InventarioViewModel : ViewModelBase
     private void EditarIngrediente(Ingrediente? ingrediente)
     {
         if (ingrediente == null) return;
-        var dialog = IngredienteDialog.ParaEditar(ingrediente);
+        var dialog = IngredienteDialog.ParaEditar(ingrediente, _dbFactory);
         dialog.Owner = Application.Current?.MainWindow;
         if (dialog.ShowDialog() == true)
         {

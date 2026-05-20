@@ -2,6 +2,8 @@ using System;
 using System.IO;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using ValeriosPizza.Data;
 
 namespace ValeriosPizza.Services;
@@ -19,15 +21,25 @@ namespace ValeriosPizza.Services;
 /// El servicio reemplaza la lógica que antes estaba inline en
 /// <see cref="App.OnStartup"/> y permite probarla por separado.
 /// </summary>
+// CA1848 sugiere usar LoggerMessage delegates por performance, pero
+// estos logs sólo se emiten en el arranque (4 llamadas, una vez por
+// proceso); no justifican la complejidad adicional.
+[System.Diagnostics.CodeAnalysis.SuppressMessage(
+    "Performance", "CA1848:Use the LoggerMessage delegates",
+    Justification = "Bajo volumen: sólo se emite en startup.")]
 public sealed class DatabaseInitializer
 {
     private const int RespaldosAutomaticosMaximos = 7;
 
     private readonly IDbContextFactory<PizzeriaDbContext> _dbFactory;
+    private readonly ILogger<DatabaseInitializer> _logger;
 
-    public DatabaseInitializer(IDbContextFactory<PizzeriaDbContext> dbFactory)
+    public DatabaseInitializer(
+        IDbContextFactory<PizzeriaDbContext> dbFactory,
+        ILogger<DatabaseInitializer>? logger = null)
     {
         _dbFactory = dbFactory;
+        _logger = logger ?? NullLogger<DatabaseInitializer>.Instance;
     }
 
     /// <summary>
@@ -56,21 +68,27 @@ public sealed class DatabaseInitializer
     /// </summary>
     public void Inicializar(Action<Exception, string> reportarError)
     {
+        _logger.LogInformation("Inicializando base de datos en {Ruta}", PizzeriaDbContext.DefaultDbPath);
+
         TryEjecutar(() => CrearRespaldoAutomaticoSiAplica(),
             "Crear respaldo automático", reportarError);
 
         TryEjecutar(BootstrapEsquema,
             "Inicializar esquema de base de datos", reportarError);
+
+        _logger.LogInformation("Inicialización de base de datos completada.");
     }
 
-    private static void TryEjecutar(Action paso, string contexto, Action<Exception, string> reportarError)
+    private void TryEjecutar(Action paso, string contexto, Action<Exception, string> reportarError)
     {
         try
         {
             paso();
+            _logger.LogDebug("Paso completado: {Contexto}", contexto);
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Falló paso de inicialización: {Contexto}", contexto);
             reportarError(ex, contexto);
         }
     }
@@ -257,6 +275,28 @@ public sealed class DatabaseInitializer
             );");
         db.Database.ExecuteSqlRaw(
             "CREATE INDEX IF NOT EXISTS \"IX_BodegaItems_FechaAgregado\" ON \"BodegaItems\" (\"FechaAgregado\");");
+
+        // 7. Índices por Fecha en tablas de movimientos. Reportes/Consulta/
+        //    Inventario filtran siempre por rangos de fecha; sin estos índices
+        //    SQLite hace table scan cuando el historial crece. CREATE INDEX
+        //    IF NOT EXISTS los hace idempotentes en BDs ya creadas.
+        var tablasFecha = new (string Tabla, string Columna)[]
+        {
+            ("Entradas",            "Fecha"),
+            ("Gastos",              "Fecha"),
+            ("Mermas",              "Fecha"),
+            ("Cortesias",           "Fecha"),
+            ("MercanciasRecibidas", "Fecha"),
+            ("InventarioDiscos",    "Fecha"),
+        };
+        foreach (var (tabla, columna) in tablasFecha)
+        {
+            // Identificadores hardcoded en este archivo: el warning EF1002
+            // (riesgo de SQL injection con interpolación) no aplica.
+            var sql = "CREATE INDEX IF NOT EXISTS \"IX_" + tabla + "_" + columna +
+                      "\" ON \"" + tabla + "\" (\"" + columna + "\");";
+            db.Database.ExecuteSqlRaw(sql);
+        }
     }
 
     private static int ContarColumna(PizzeriaDbContext db, string tabla, string columna)

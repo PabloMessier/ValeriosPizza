@@ -16,26 +16,33 @@ namespace ValeriosPizza.Windows;
 public partial class ProductoDialog : Window
 {
     private readonly ProductoDialogViewModel _vm;
+    private readonly IDbContextFactory<PizzeriaDbContext> _dbFactory;
 
     /// <summary>
     /// Producto creado o editado. Disponible cuando <c>DialogResult == true</c>.
     /// </summary>
     public Producto? ProductoResultante { get; private set; }
 
-    private ProductoDialog(ProductoDialogViewModel vm)
+    private ProductoDialog(
+        ProductoDialogViewModel vm,
+        IDbContextFactory<PizzeriaDbContext> dbFactory)
     {
         InitializeComponent();
         _vm = vm;
+        _dbFactory = dbFactory;
         DataContext = vm;
         Loaded += (_, _) => NombreTextBox.Focus();
     }
 
     /// <summary>Crea un diálogo en modo "nuevo producto".</summary>
-    public static ProductoDialog ParaCrear() => new(new ProductoDialogViewModel());
+    public static ProductoDialog ParaCrear(IDbContextFactory<PizzeriaDbContext> dbFactory) =>
+        new(new ProductoDialogViewModel(), dbFactory);
 
     /// <summary>Crea un diálogo en modo "editar producto existente".</summary>
-    public static ProductoDialog ParaEditar(Producto existente) =>
-        new(new ProductoDialogViewModel(existente));
+    public static ProductoDialog ParaEditar(
+        Producto existente,
+        IDbContextFactory<PizzeriaDbContext> dbFactory) =>
+        new(new ProductoDialogViewModel(existente), dbFactory);
 
     private void CancelarClick(object sender, RoutedEventArgs e)
     {
@@ -52,7 +59,7 @@ public partial class ProductoDialog : Window
 
         try
         {
-            using var db = new PizzeriaDbContext();
+            using var db = _dbFactory.CreateDbContext();
 
             // Validar unicidad del nombre (case-insensitive, ignorando el propio si edita).
             // Se usa EF.Functions.Like porque SQLite LIKE es case-insensitive
@@ -72,7 +79,11 @@ public partial class ProductoDialog : Window
             Producto producto;
             if (_vm.EsEdicion && _vm.ProductoId.HasValue)
             {
-                producto = db.Productos.First(p => p.Id == _vm.ProductoId.Value);
+                // Find() siempre trackea (independiente del NoTracking default
+                // del DbContext) porque consulta primero el ChangeTracker local.
+                producto = db.Productos.Find(_vm.ProductoId.Value)
+                    ?? throw new InvalidOperationException(
+                        $"No se encontró el producto con id {_vm.ProductoId.Value}.");
                 producto.Nombre = _vm.Nombre.Trim();
                 producto.Categoria = _vm.CategoriaSeleccionada;
                 producto.Estado = _vm.EstadoSeleccionado;

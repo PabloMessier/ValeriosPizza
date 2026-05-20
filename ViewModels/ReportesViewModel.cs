@@ -59,6 +59,7 @@ public class ResumenConteo
 public partial class ReportesViewModel : ViewModelBase
 {
     private readonly IDbContextFactory<PizzeriaDbContext> _dbFactory;
+    private readonly ExportService _exportService;
 
     [ObservableProperty]
     private ObservableCollection<ResumenIngrediente> _resumenIngredientes = new();
@@ -169,9 +170,12 @@ public partial class ReportesViewModel : ViewModelBase
     public bool MostrarRangoBorrado =>
         AlcanceBorradoSeleccionado == "Rango personalizado (fecha y hora)";
 
-    public ReportesViewModel(IDbContextFactory<PizzeriaDbContext> dbFactory)
+    public ReportesViewModel(
+        IDbContextFactory<PizzeriaDbContext> dbFactory,
+        ExportService exportService)
     {
         _dbFactory = dbFactory;
+        _exportService = exportService;
         ResumenIngredientesPaged = new PagedCollectionView<ResumenIngrediente>(ResumenIngredientes);
         ResumenProductosPaged    = new PagedCollectionView<ResumenProducto>(ResumenProductos);
         ResumenDiarioPaged       = new PagedCollectionView<ResumenDiario>(ResumenDiario);
@@ -370,15 +374,15 @@ public partial class ReportesViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void ExportarCSV() => Exportar("CSV", datos => ExportService.ExportarCsv(datos));
+    private Task ExportarCSV() => ExportarAsync("CSV", ExportService.ExportarCsv);
 
     [RelayCommand]
-    private void ExportarExcel() => Exportar("Excel", datos => ExportService.ExportarExcel(datos));
+    private Task ExportarExcel() => ExportarAsync("Excel", ExportService.ExportarExcel);
 
     [RelayCommand]
-    private void ExportarPDF() => Exportar("PDF", datos => ExportService.ExportarPdf(datos));
+    private Task ExportarPDF() => ExportarAsync("PDF", ExportService.ExportarPdf);
 
-    private void Exportar(string formato, Func<ExportService.DatosReporte, string> exportador)
+    private async Task ExportarAsync(string formato, Func<ExportService.DatosReporte, string> exportador)
     {
         try
         {
@@ -396,8 +400,11 @@ public partial class ReportesViewModel : ViewModelBase
                 return;
             }
 
-            var datos = ExportService.CargarDatos(dialog.FechaInicio, dialog.FechaFin);
-            var ruta = exportador(datos);
+            // CargarDatosAsync hace las consultas EF off-UI; el render
+            // pesado (ClosedXML/QuestPDF) se mueve a Task.Run para no
+            // bloquear el dispatcher mientras se construye el archivo.
+            var datos = await _exportService.CargarDatosAsync(dialog.FechaInicio, dialog.FechaFin);
+            var ruta = await Task.Run(() => exportador(datos));
             MensajeExportacion = $"✓ Reporte {formato} ({dialog.EtiquetaPeriodo}) exportado: {ruta}";
             System.Diagnostics.Process.Start("explorer.exe", ExportService.CarpetaReportes);
         }
@@ -624,8 +631,8 @@ public partial class ReportesViewModel : ViewModelBase
             }
 
             ResultadoBorrado resultado = alcance == AlcanceBorrado.TodoElCatalogo
-                ? DatabaseWipeService.BorrarTodo()
-                : DatabaseWipeService.BorrarPorRango(inicio, fin);
+                ? DatabaseWipeService.BorrarTodo(_dbFactory)
+                : DatabaseWipeService.BorrarPorRango(inicio, fin, _dbFactory);
 
             MensajeBorrado = $"✓ Borrado completado — {resultado.Total} registro(s) eliminado(s).";
 

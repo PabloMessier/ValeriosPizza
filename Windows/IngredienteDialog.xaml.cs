@@ -9,30 +9,39 @@ namespace ValeriosPizza.Windows;
 public partial class IngredienteDialog : Window
 {
     private readonly IngredienteDialogViewModel _vm;
+    private readonly IDbContextFactory<PizzeriaDbContext> _dbFactory;
 
     /// <summary>
     /// Ingrediente resultante (creado o editado). Disponible cuando DialogResult == true.
     /// </summary>
     public Ingrediente? IngredienteResultante { get; private set; }
 
-    private IngredienteDialog(IngredienteDialogViewModel vm)
+    private IngredienteDialog(
+        IngredienteDialogViewModel vm,
+        IDbContextFactory<PizzeriaDbContext> dbFactory)
     {
         InitializeComponent();
         _vm = vm;
+        _dbFactory = dbFactory;
         DataContext = vm;
         Loaded += (_, _) => NombreTextBox.Focus();
     }
 
     /// <summary>
-    /// Crea un diálogo en modo "nuevo ingrediente".
+    /// Crea un diálogo en modo "nuevo ingrediente". El llamador debe pasar
+    /// la factoría de contexto (inyectada por DI en el VM padre) para que
+    /// el diálogo use la misma fuente de datos que el resto de la app.
     /// </summary>
-    public static IngredienteDialog ParaCrear() => new(new IngredienteDialogViewModel());
+    public static IngredienteDialog ParaCrear(IDbContextFactory<PizzeriaDbContext> dbFactory) =>
+        new(new IngredienteDialogViewModel(), dbFactory);
 
     /// <summary>
     /// Crea un diálogo en modo "editar ingrediente existente".
     /// </summary>
-    public static IngredienteDialog ParaEditar(Ingrediente existente) =>
-        new(new IngredienteDialogViewModel(existente));
+    public static IngredienteDialog ParaEditar(
+        Ingrediente existente,
+        IDbContextFactory<PizzeriaDbContext> dbFactory) =>
+        new(new IngredienteDialogViewModel(existente), dbFactory);
 
     private void CancelarClick(object sender, RoutedEventArgs e)
     {
@@ -49,7 +58,7 @@ public partial class IngredienteDialog : Window
 
         try
         {
-            using var db = new PizzeriaDbContext();
+            using var db = _dbFactory.CreateDbContext();
 
             // Validar unicidad del nombre (case-insensitive, ignorando el propio si edita).
             // Se usa EF.Functions.Like porque el proveedor de SQLite no traduce
@@ -70,7 +79,11 @@ public partial class IngredienteDialog : Window
             Ingrediente ingrediente;
             if (_vm.EsEdicion && _vm.IngredienteId.HasValue)
             {
-                ingrediente = db.Ingredientes.First(i => i.Id == _vm.IngredienteId.Value);
+                // Find() siempre trackea (independiente del NoTracking default
+                // del DbContext) porque consulta primero el ChangeTracker local.
+                ingrediente = db.Ingredientes.Find(_vm.IngredienteId.Value)
+                    ?? throw new InvalidOperationException(
+                        $"No se encontró el ingrediente con id {_vm.IngredienteId.Value}.");
                 ingrediente.Nombre = _vm.Nombre.Trim();
                 ingrediente.UnidadMedida = _vm.UnidadMedida.Trim();
                 ingrediente.CantidadActual = _vm.CantidadActualValor;

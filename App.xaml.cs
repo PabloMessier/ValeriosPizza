@@ -10,6 +10,7 @@ using System.Windows.Threading;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using QuestPDF.Infrastructure;
 using ValeriosPizza.Data;
 using ValeriosPizza.Services;
@@ -264,6 +265,15 @@ public partial class App : Application
     private static IHost ConstruirHost()
     {
         return Host.CreateDefaultBuilder()
+            .ConfigureLogging(logging =>
+            {
+                // Generic Host ya añade Console + Debug + EventSource +
+                // EventLog (Windows). Limitamos el nivel global a
+                // Information para no inundar la salida de Debug en
+                // producción; las consultas de EF se silencian aparte.
+                logging.SetMinimumLevel(LogLevel.Information);
+                logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);
+            })
             .ConfigureServices((_, services) =>
             {
                 // Factoría de DbContext: cada llamador crea un context dedicado
@@ -276,9 +286,21 @@ public partial class App : Application
                         Directory.CreateDirectory(dir);
                     }
                     o.UseSqlite($"Data Source={PizzeriaDbContext.DefaultDbPath}");
+                    // Por defecto las consultas NO trackean entidades:
+                    // la inmensa mayoría son lecturas para mostrar en UI
+                    // (Reportes, Consulta, Inventario, Dashboard). Las
+                    // mutaciones usan Find() (tracking implícito) o
+                    // AsTracking() explícito cuando hace falta.
+                    o.UseQueryTrackingBehavior(
+                        Microsoft.EntityFrameworkCore.QueryTrackingBehavior.NoTracking);
                 });
 
                 services.AddSingleton<DatabaseInitializer>();
+
+                // ExportService usa la factoría de DbContext de DI; lo
+                // registramos como singleton porque no mantiene estado
+                // mutable (sólo lee la BD bajo demanda).
+                services.AddSingleton<ExportService>();
 
                 // Recordatorio de cierre diario. Singleton porque mantiene
                 // estado (último día avisado) y es propietario de un timer.

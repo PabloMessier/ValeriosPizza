@@ -97,6 +97,16 @@ public class PizzeriaDbContext : DbContext
         modelBuilder.Entity<InventarioCaja>()
             .HasIndex(c => c.Fecha);
 
+        // Índices por Fecha en tablas de movimientos para acelerar las
+        // consultas de Reportes/Consulta/Inventario, que siempre filtran
+        // por rango de fechas. Sin estos índices SQLite hace table scan.
+        modelBuilder.Entity<Entrada>().HasIndex(e => e.Fecha);
+        modelBuilder.Entity<Gasto>().HasIndex(g => g.Fecha);
+        modelBuilder.Entity<Merma>().HasIndex(m => m.Fecha);
+        modelBuilder.Entity<Cortesia>().HasIndex(c => c.Fecha);
+        modelBuilder.Entity<MercanciaRecibida>().HasIndex(m => m.Fecha);
+        modelBuilder.Entity<InventarioDisco>().HasIndex(d => d.Fecha);
+
         // Bodega: índice por fecha para mostrar los más recientes primero
         // sin escanear toda la tabla. No imponemos FK a Ingredientes /
         // MercanciasRecibidas para que las filas históricas sobrevivan a
