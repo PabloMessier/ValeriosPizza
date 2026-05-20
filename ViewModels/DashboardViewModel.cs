@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ValeriosPizza.Data;
 using ValeriosPizza.Models;
 using System.Collections.ObjectModel;
+using System.Windows;
 
 namespace ValeriosPizza.ViewModels;
 
@@ -39,11 +40,28 @@ public partial class DashboardViewModel : ViewModelBase
     [ObservableProperty]
     private int _cortesiasHoy = 0;
 
+    // El valor del stepper para Discos. Editarlo NO escribe en la BD; eso
+    // sólo ocurre cuando la usuaria presiona el botón "Actualizar". Así se
+    // evita pelear con la pantalla "Registro Rápido" — que también inserta
+    // filas en InventarioDiscos / InventarioCajas a su propio ritmo — y se
+    // mantiene un único momento de intención por parte de la dueña.
+    // NotifyCanExecuteChangedFor hace que el botón Actualizar se habilite
+    // automáticamente cuando hay un cambio pendiente y se inhabilite cuando
+    // el stepper iguala al último valor leído de BD.
     [ObservableProperty]
-    private int _discosDisponibles = 0;
+    [NotifyCanExecuteChangedFor(nameof(ActualizarDiscosCommand))]
+    private int _discosDisponibles;
 
     [ObservableProperty]
-    private int _cajasDisponibles = 0;
+    [NotifyCanExecuteChangedFor(nameof(ActualizarCajasCommand))]
+    private int _cajasDisponibles;
+
+    // Snapshot del valor que vino de la BD en la última carga; sirve para
+    // distinguir cambios hechos por la usuaria (a través del NumericStepper)
+    // de los que vienen de recargar la tabla y para saber si hay un ajuste
+    // pendiente de aplicar.
+    private int _discosBaseDb;
+    private int _cajasBaseDb;
 
     [ObservableProperty]
     private ObservableCollection<Ingrediente> _alertasStock = new();
@@ -57,10 +75,127 @@ public partial class DashboardViewModel : ViewModelBase
     public DashboardViewModel(IDbContextFactory<PizzeriaDbContext> dbFactory)
     {
         _dbFactory = dbFactory;
+
         // Fire-and-forget: la carga inicial se hace en segundo plano para no
         // bloquear la creación del VM. Cualquier excepción se captura y se
         // vuelca al log para no perderla.
         _ = CargarDatosHoyAsync();
+    }
+
+    // ============================================================
+    //  Botón "Actualizar" — commit explícito con transacción
+    // ============================================================
+
+    /// <summary>Hay un ajuste de discos pendiente de aplicar.</summary>
+    private bool PuedeActualizarDiscos() => DiscosDisponibles != _discosBaseDb;
+
+    /// <summary>Hay un ajuste de cajas pendiente de aplicar.</summary>
+    private bool PuedeActualizarCajas() => CajasDisponibles != _cajasBaseDb;
+
+    /// <summary>
+    /// Persiste el ajuste de discos como una fila en <c>InventarioDiscos</c>
+    /// dentro de una transacción explícita. Para evitar que un cambio hecho
+    /// concurrentemente desde "Registro Rápido" se pierda, se recalcula el
+    /// balance vigente al inicio de la transacción y se usa para derivar el
+    /// delta efectivo — de manera que <c>DiscosDisponibles</c> queda
+    /// exactamente igual al valor que muestra el stepper.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(PuedeActualizarDiscos))]
+    private async Task ActualizarDiscosAsync()
+    {
+        await ActualizarBalanceAsync(
+            esDiscos: true,
+            objetivo: DiscosDisponibles,
+            etiquetaError: "ActualizarDiscosAsync");
+        // Re-leer dashboard completo: refresca el balance y demás tarjetas.
+        await CargarDatosHoyAsync();
+    }
+
+    /// <summary>Análogo a <see cref="ActualizarDiscosAsync"/> para Cajas.</summary>
+    [RelayCommand(CanExecute = nameof(PuedeActualizarCajas))]
+    private async Task ActualizarCajasAsync()
+    {
+        await ActualizarBalanceAsync(
+            esDiscos: false,
+            objetivo: CajasDisponibles,
+            etiquetaError: "ActualizarCajasAsync");
+        await CargarDatosHoyAsync();
+    }
+
+    /// <summary>
+    /// Implementación común: dentro de una transacción SQLite, lee el
+    /// balance vigente, calcula el delta hacia <paramref name="objetivo"/>
+    /// y persiste una sola fila de ajuste. Si algo falla, <c>RollbackAsync</c>
+    /// deja la tabla intacta.
+    /// </summary>
+    private async Task ActualizarBalanceAsync(bool esDiscos, int objetivo, string etiquetaError)
+    {
+        try
+        {
+            await using var db = _dbFactory.CreateDbContext();
+            await using var tx = await db.Database.BeginTransactionAsync();
+            try
+            {
+                if (esDiscos)
+                {
+                    var balanceVigente = await db.InventarioDiscos
+                        .SumAsync(d => (int?)(d.CantidadInicial + d.DiscosPreparados
+                                          - d.DiscosUtilizados - d.DiscosMerma - d.DiscosCortesia)) ?? 0;
+                    var delta = objetivo - balanceVigente;
+                    if (delta != 0)
+                    {
+                        db.InventarioDiscos.Add(new InventarioDisco
+                        {
+                            Fecha = DateTime.Now,
+                            CantidadInicial = delta > 0 ? delta : 0,
+                            DiscosPreparados = 0,
+                            DiscosUtilizados = delta < 0 ? -delta : 0,
+                            DiscosMerma = 0,
+                            DiscosCortesia = 0,
+                            Notas = $"Ajuste manual desde Dashboard (Δ {(delta > 0 ? "+" : "")}{delta})"
+                        });
+                        await db.SaveChangesAsync();
+                    }
+                }
+                else
+                {
+                    var balanceVigente = await db.InventarioCajas
+                        .SumAsync(c => (int?)(c.CantidadInicial + c.CajasRecibidas
+                                          - c.CajasUtilizadas - c.CajasMerma)) ?? 0;
+                    var delta = objetivo - balanceVigente;
+                    if (delta != 0)
+                    {
+                        db.InventarioCajas.Add(new InventarioCaja
+                        {
+                            Fecha = DateTime.Now,
+                            CantidadInicial = delta > 0 ? delta : 0,
+                            CajasRecibidas = 0,
+                            CajasUtilizadas = delta < 0 ? -delta : 0,
+                            CajasMerma = 0,
+                            Notas = $"Ajuste manual desde Dashboard (Δ {(delta > 0 ? "+" : "")}{delta})"
+                        });
+                        await db.SaveChangesAsync();
+                    }
+                }
+
+                await tx.CommitAsync();
+            }
+            catch
+            {
+                // Cualquier error revierte la transacción para no dejar la
+                // tabla en un estado a medias y se vuelve a lanzar para que
+                // el catch externo lo registre y notifique a la usuaria.
+                await tx.RollbackAsync();
+                throw;
+            }
+        }
+        catch (Exception ex)
+        {
+            App.GuardarErrorDump(ex, etiquetaError);
+            MessageBox.Show(
+                $"No se pudo guardar el ajuste.\n\n{ex.Message}",
+                "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     private async Task CargarDatosHoyAsync()
@@ -80,15 +215,25 @@ public partial class DashboardViewModel : ViewModelBase
             // DiscosPreparados al stock y RESTA Utilizados/Merma/Cortesía. Esto permite
             // que las "DISCOS INICIALES" de un guardado posterior se acumulen, y que
             // los Preparados/Utilizados/Merma/Cortesía se reflejen en tiempo real.
-            DiscosDisponibles = await db.InventarioDiscos
+            var discosBalance = await db.InventarioDiscos
                 .SumAsync(d => (int?)(d.CantidadInicial + d.DiscosPreparados
                                   - d.DiscosUtilizados - d.DiscosMerma - d.DiscosCortesia)) ?? 0;
 
             // Cajas disponibles: balance acumulado de todos los registros de cajas.
             // Cada fila aporta CantidadInicial + Recibidas - Utilizadas - Merma, lo que
             // refleja el stock real al momento (incluye reposiciones y mermas históricas).
-            CajasDisponibles = await db.InventarioCajas
+            var cajasBalance = await db.InventarioCajas
                 .SumAsync(c => (int?)(c.CantidadInicial + c.CajasRecibidas - c.CajasUtilizadas - c.CajasMerma)) ?? 0;
+
+            // Asignamos primero el base y luego el valor visible para que
+            // PuedeActualizarXxx vea base == disponibles y deje los botones
+            // "Actualizar" deshabilitados al cargar.
+            _discosBaseDb = discosBalance;
+            _cajasBaseDb = cajasBalance;
+            DiscosDisponibles = discosBalance;
+            CajasDisponibles = cajasBalance;
+            ActualizarDiscosCommand.NotifyCanExecuteChanged();
+            ActualizarCajasCommand.NotifyCanExecuteChanged();
 
             // Cargar alertas de stock bajo
             var ingredientesBajos = await db.Ingredientes

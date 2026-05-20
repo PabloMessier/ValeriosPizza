@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ctrls="clr-namespace:ValeriosPizza.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
              Background="{DynamicResource WindowBackgroundBrush}">
@@ -38,7 +39,25 @@
                         <TextBlock Text="DISCOS DISPONIBLES" FontSize="13" Foreground="{DynamicResource AccentTextBrush}" Opacity="0.75" FontWeight="Medium"/>
                         <TextBlock Text="Bases de pizza listas" FontSize="13" Foreground="{DynamicResource AccentTextBrush}" Opacity="0.6" Margin="0,2,0,0"/>
                     </StackPanel>
-                    <TextBlock Grid.Column="1" Text="{Binding DiscosDisponibles}" FontSize="52" Foreground="{DynamicResource AccentTextBrush}" FontWeight="Light" VerticalAlignment="Center"/>
+                    <!-- Stepper + botón "Actualizar". El stepper sólo modifica
+                         el valor visible; nada se escribe en la BD hasta que
+                         la usuaria presiona Actualizar. El botón está
+                         deshabilitado cuando no hay ajuste pendiente. -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <ctrls:NumericStepper
+                            Value="{Binding DiscosDisponibles, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            Minimum="0"
+                            Width="180" Height="42"/>
+                        <Button Content="Actualizar"
+                                Command="{Binding ActualizarDiscosCommand}"
+                                ToolTip="Guarda el ajuste como una transacción en la base de datos"
+                                HorizontalAlignment="Stretch"
+                                Margin="0,6,0,0" Padding="0,4"
+                                FontSize="12" FontWeight="SemiBold"
+                                Cursor="Hand"
+                                Background="#33FFFFFF" Foreground="White"
+                                BorderBrush="#55FFFFFF" BorderThickness="1"/>
+                    </StackPanel>
                 </Grid>
             </Border>
 
@@ -52,7 +71,21 @@
                         <TextBlock Text="CAJAS DISPONIBLES" FontSize="13" Foreground="#D7CCC8" FontWeight="Medium"/>
                         <TextBlock Text="Cajas para pizza (30 cm)" FontSize="13" Foreground="#BCAAA4" Margin="0,2,0,0"/>
                     </StackPanel>
-                    <TextBlock Grid.Column="1" Text="{Binding CajasDisponibles}" FontSize="52" Foreground="White" FontWeight="Light" VerticalAlignment="Center"/>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <ctrls:NumericStepper
+                            Value="{Binding CajasDisponibles, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            Minimum="0"
+                            Width="180" Height="42"/>
+                        <Button Content="Actualizar"
+                                Command="{Binding ActualizarCajasCommand}"
+                                ToolTip="Guarda el ajuste como una transacción en la base de datos"
+                                HorizontalAlignment="Stretch"
+                                Margin="0,6,0,0" Padding="0,4"
+                                FontSize="12" FontWeight="SemiBold"
+                                Cursor="Hand"
+                                Background="#33FFFFFF" Foreground="White"
+                                BorderBrush="#55FFFFFF" BorderThickness="1"/>
+                    </StackPanel>
                 </Grid>
             </Border>
         </Grid>
