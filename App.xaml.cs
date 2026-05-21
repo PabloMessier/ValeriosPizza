@@ -273,6 +273,12 @@ public partial class App : Application
                 // producción; las consultas de EF se silencian aparte.
                 logging.SetMinimumLevel(LogLevel.Information);
                 logging.AddFilter("Microsoft.EntityFrameworkCore", LogLevel.Warning);
+
+                // Sink a archivo (%LOCALAPPDATA%\ValeriosPizzeria\Logs\app.log)
+                // para que el log persista en la PC de la dueña y se pueda
+                // enviar a soporte sin esperar a que ocurra una excepción
+                // (que iría a error_dump.txt). Rota a 1 MB.
+                logging.AddProvider(new FileLoggerProvider(LogLevel.Information));
             })
             .ConfigureServices((_, services) =>
             {

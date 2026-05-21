@@ -2,6 +2,12 @@
 
 Sistema de gestión de inventario desarrollado específicamente para Valerio's Pizza.
 
+> **Para desarrolladores y agentes IA:** las convenciones de código, patrones
+> obligatorios y comandos esenciales viven en [`AGENTS.md`](./AGENTS.md).
+> Este README documenta la **funcionalidad** del sistema (módulos,
+> almacenamiento, diseño visual). El historial de decisiones arquitectónicas
+> está en [`DEVELOPMENT_NOTES.md`](./DEVELOPMENT_NOTES.md).
+
 ## 🎯 Objetivo
 
 Crear una solución compacta, formal y minimalista que permita gestionar el inventario diario de manera rápida, minimizando el tiempo que la dueña pasa en el software para que pueda atender más clientes.

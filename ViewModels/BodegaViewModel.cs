@@ -76,7 +76,7 @@ public partial class BodegaViewModel : ViewModelBase
     {
         try
         {
-            await using var db = _dbFactory.CreateDbContext();
+            await using var db = await _dbFactory.CreateDbContextAsync();
             var data = await db.BodegaItems
                 .OrderByDescending(b => b.FechaAgregado)
                 .ToListAsync();
@@ -107,7 +107,7 @@ public partial class BodegaViewModel : ViewModelBase
 
         try
         {
-            await using var db = _dbFactory.CreateDbContext();
+            await using var db = await _dbFactory.CreateDbContextAsync();
             var existente = await db.BodegaItems.FindAsync(item.Id);
             if (existente != null)
             {
@@ -146,7 +146,7 @@ public partial class BodegaViewModel : ViewModelBase
 
         try
         {
-            await using var db = _dbFactory.CreateDbContext();
+            await using var db = await _dbFactory.CreateDbContextAsync();
             await db.BodegaItems.ExecuteDeleteAsync();
             await CargarAsync();
         }

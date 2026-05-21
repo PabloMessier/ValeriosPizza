@@ -1,5 +1,11 @@
 # Notas de Desarrollo - Valerio's Pizza
 
+> **Lectura recomendada antes:** [`AGENTS.md`](./AGENTS.md) tiene las
+> convenciones vigentes (DI, MVVM, testing). Este archivo es el **historial
+> arquitectónico** del proyecto: por qué se tomaron ciertas decisiones, qué
+> refactorings se ejecutaron y cuál es la deuda técnica conocida. Si solo
+> querés contribuir al código, AGENTS.md es suficiente.
+
 ## Estado Actual del Proyecto ✅
 
 ### Refactor arquitectónico (mayo 2026 — olas 0–5)
