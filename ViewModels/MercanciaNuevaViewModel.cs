@@ -166,9 +166,14 @@ public partial class MercanciaNuevaViewModel : ViewModelBase
         // ===== Crear registro nuevo (con undo) =====
         var ing = IngredienteSeleccionado;
         string? rutaFinal = null;
+        // Copiamos la factura a la carpeta interna ANTES del save porque la
+        // ruta forma parte del registro a insertar. Si el save falla, hay
+        // que borrar el archivo recién copiado para no acumular huérfanos.
+        bool rutaFinalEsCopiaNueva = false;
         if (!string.IsNullOrWhiteSpace(_rutaFacturaPendiente))
         {
             rutaFinal = CopiarFacturaACarpeta(_rutaFacturaPendiente!);
+            rutaFinalEsCopiaNueva = true;
         }
         else if (!string.IsNullOrWhiteSpace(RutaFactura))
         {
@@ -189,13 +194,36 @@ public partial class MercanciaNuevaViewModel : ViewModelBase
             Retencion = CalcMercancia.Retencion,
             RutaFactura = rutaFinal
         };
-        await _undoRedo.EjecutarAsync(cmd);
+        try
+        {
+            await _undoRedo.EjecutarAsync(cmd);
+        }
+        catch
+        {
+            // Si el save falla y habíamos copiado la factura a la carpeta
+            // interna, eliminamos el archivo huérfano para no llenar el disco.
+            if (rutaFinalEsCopiaNueva && rutaFinal != null)
+            {
+                BorrarSiExiste(rutaFinal);
+            }
+            throw;
+        }
 
         MessageBox.Show($"Mercancía registrada: {Cantidad} {ing.UnidadMedida} de {ing.Nombre}",
             "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
 
         LimpiarFormulario();
         CargarMercanciasHoy();
+    }
+
+    /// <summary>
+    /// Borra un archivo si existe, tragándose cualquier IOException para no
+    /// enmascarar la excepción original que disparó la limpieza.
+    /// </summary>
+    private static void BorrarSiExiste(string ruta)
+    {
+        try { if (File.Exists(ruta)) File.Delete(ruta); }
+        catch { /* mejor esfuerzo */ }
     }
 
     /// <summary>
@@ -233,9 +261,14 @@ public partial class MercanciaNuevaViewModel : ViewModelBase
         existente.PrecioUnitario = CalcMercancia.PrecioUnitario;
         existente.Impuesto = CalcMercancia.Impuesto;
         existente.Retencion = CalcMercancia.Retencion;
+        // Si hay una factura pendiente la copiamos a la carpeta interna
+        // antes del save; si el save falla, borramos la copia para no dejar
+        // archivos huérfanos referenciados por nadie.
+        string? rutaCopia = null;
         if (!string.IsNullOrWhiteSpace(_rutaFacturaPendiente))
         {
-            existente.RutaFactura = CopiarFacturaACarpeta(_rutaFacturaPendiente!);
+            rutaCopia = CopiarFacturaACarpeta(_rutaFacturaPendiente!);
+            existente.RutaFactura = rutaCopia;
         }
         else
         {
@@ -249,7 +282,15 @@ public partial class MercanciaNuevaViewModel : ViewModelBase
             ingredienteNuevo.FechaActualizacion = DateTime.Now;
         }
 
-        db.SaveChanges();
+        try
+        {
+            db.SaveChanges();
+        }
+        catch
+        {
+            if (rutaCopia != null) BorrarSiExiste(rutaCopia);
+            throw;
+        }
 
         MessageBox.Show($"Mercancía actualizada: {Cantidad} {IngredienteSeleccionado.UnidadMedida} de {IngredienteSeleccionado.Nombre}",
             "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -573,9 +614,13 @@ public partial class MercanciaNuevaViewModel : ViewModelBase
         if (IngredienteSeleccionado == null || Cantidad <= 0)
             return (false, "falta ingrediente o cantidad");
 
+        string? rutaCopia = null;
         try
         {
             using var db = _dbFactory.CreateDbContext();
+            rutaCopia = !string.IsNullOrWhiteSpace(_rutaFacturaPendiente)
+                ? CopiarFacturaACarpeta(_rutaFacturaPendiente!)
+                : null;
             db.MercanciasRecibidas.Add(new MercanciaRecibida
             {
                 Fecha = DateTime.Now,
@@ -587,9 +632,7 @@ public partial class MercanciaNuevaViewModel : ViewModelBase
                 PrecioUnitario = CalcMercancia.PrecioUnitario,
                 Impuesto = CalcMercancia.Impuesto,
                 Retencion = CalcMercancia.Retencion,
-                RutaFactura = !string.IsNullOrWhiteSpace(_rutaFacturaPendiente)
-                    ? CopiarFacturaACarpeta(_rutaFacturaPendiente!)
-                    : null
+                RutaFactura = rutaCopia
             });
             var ing = db.Ingredientes.Find(IngredienteSeleccionado.Id);
             if (ing != null)
@@ -603,6 +646,9 @@ public partial class MercanciaNuevaViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
+            // Si la copia de la factura ya sucedió, borrarla para no
+            // dejar archivos huérfanos cuando el save falla.
+            if (rutaCopia != null) BorrarSiExiste(rutaCopia);
             App.GuardarErrorDump(ex, "Guardar Mercancía al cerrar");
             return (false, ex.Message);
         }

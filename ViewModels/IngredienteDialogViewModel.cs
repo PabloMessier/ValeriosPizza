@@ -1,5 +1,9 @@
+using System;
 using System.Globalization;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.EntityFrameworkCore;
+using ValeriosPizza.Data;
 using ValeriosPizza.Models;
 
 namespace ValeriosPizza.ViewModels;
@@ -10,9 +14,14 @@ namespace ValeriosPizza.ViewModels;
 /// independientemente de la cultura del SO (en máquinas con configuración
 /// regional en español, el parseo automático de WPF rechazaba "5.5" y dejaba
 /// el campo en cero sin avisar al usuario).
+///
+/// Además del estado del formulario, el VM encapsula la persistencia
+/// (<see cref="GuardarAsync"/>) para que el code-behind del diálogo se
+/// limite a coordinar el ciclo de vida de la ventana.
 /// </summary>
 public partial class IngredienteDialogViewModel : ViewModelBase
 {
+    private readonly IDbContextFactory<PizzeriaDbContext>? _dbFactory;
     [ObservableProperty]
     private string _titulo = "Nuevo Ingrediente";
 
@@ -42,12 +51,23 @@ public partial class IngredienteDialogViewModel : ViewModelBase
     /// </summary>
     public string[] UnidadesSugeridas { get; } = { "kg", "g", "litros", "ml", "unidades" };
 
-    public IngredienteDialogViewModel()
+    /// <summary>
+    /// Constructor sin parámetros para compatibilidad con código existente
+    /// y para tests del comportamiento de validación pura.
+    /// </summary>
+    public IngredienteDialogViewModel() { }
+
+    public IngredienteDialogViewModel(IDbContextFactory<PizzeriaDbContext> dbFactory)
     {
+        _dbFactory = dbFactory;
     }
 
     public IngredienteDialogViewModel(Ingrediente existente)
+        : this(existente, dbFactory: null) { }
+
+    public IngredienteDialogViewModel(Ingrediente existente, IDbContextFactory<PizzeriaDbContext>? dbFactory)
     {
+        _dbFactory = dbFactory;
         EsEdicion = true;
         IngredienteId = existente.Id;
         Titulo = "Editar Ingrediente";
@@ -92,6 +112,84 @@ public partial class IngredienteDialogViewModel : ViewModelBase
         CantidadMinimaValor = minima;
         MensajeError = string.Empty;
         return true;
+    }
+
+    /// <summary>
+    /// Resultado de <see cref="GuardarAsync"/>: indica si se persistió y,
+    /// en caso afirmativo, devuelve la entidad creada/editada.
+    /// Cuando falla, el motivo queda expuesto en
+    /// <see cref="MensajeError"/> para que la UI lo muestre.
+    /// </summary>
+    public sealed record GuardarResultado(bool Ok, Ingrediente? Ingrediente);
+
+    /// <summary>
+    /// Persiste el ingrediente (crear o editar). Valida primero, luego
+    /// comprueba unicidad case-insensitive del nombre y aplica el cambio.
+    /// La transacción implícita de <c>SaveChangesAsync</c> garantiza
+    /// atomicidad.
+    /// </summary>
+    public async Task<GuardarResultado> GuardarAsync()
+    {
+        if (_dbFactory == null)
+        {
+            MensajeError = "Error interno: no se configuró el acceso a datos.";
+            return new GuardarResultado(false, null);
+        }
+        if (!Validar()) return new GuardarResultado(false, null);
+
+        try
+        {
+            await using var db = await _dbFactory.CreateDbContextAsync();
+
+            // Validar unicidad del nombre (case-insensitive, ignorando el
+            // propio registro si es edición). SQLite LIKE es
+            // case-insensitive para ASCII por defecto, suficiente para
+            // nombres de ingredientes.
+            var nombreNormalizado = Nombre.Trim();
+            var conflicto = await db.Ingredientes.AsNoTracking().AnyAsync(i =>
+                EF.Functions.Like(i.Nombre, nombreNormalizado)
+                && (!IngredienteId.HasValue || i.Id != IngredienteId.Value));
+
+            if (conflicto)
+            {
+                MensajeError = "Ya existe un ingrediente con ese nombre.";
+                return new GuardarResultado(false, null);
+            }
+
+            Ingrediente ingrediente;
+            if (EsEdicion && IngredienteId.HasValue)
+            {
+                ingrediente = await db.Ingredientes.FindAsync(IngredienteId.Value)
+                    ?? throw new InvalidOperationException(
+                        $"No se encontró el ingrediente con id {IngredienteId.Value}.");
+                ingrediente.Nombre = nombreNormalizado;
+                ingrediente.UnidadMedida = UnidadMedida.Trim();
+                ingrediente.CantidadActual = CantidadActualValor;
+                ingrediente.CantidadMinima = CantidadMinimaValor;
+                ingrediente.FechaActualizacion = DateTime.Now;
+            }
+            else
+            {
+                ingrediente = new Ingrediente
+                {
+                    Nombre = nombreNormalizado,
+                    UnidadMedida = UnidadMedida.Trim(),
+                    CantidadActual = CantidadActualValor,
+                    CantidadMinima = CantidadMinimaValor,
+                    FechaActualizacion = DateTime.Now,
+                    Activo = true
+                };
+                db.Ingredientes.Add(ingrediente);
+            }
+
+            await db.SaveChangesAsync();
+            return new GuardarResultado(true, ingrediente);
+        }
+        catch (DbUpdateException ex)
+        {
+            MensajeError = $"Error al guardar: {ex.InnerException?.Message ?? ex.Message}";
+            return new GuardarResultado(false, null);
+        }
     }
 
     /// <summary>

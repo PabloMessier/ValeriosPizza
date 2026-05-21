@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
 using ValeriosPizza.Services;
@@ -14,6 +15,28 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty]
     private string _titulo = "Valerio's Pizza - Sistema de Inventario";
+
+    /// <summary>
+    /// Versión visible en la UI (footer / barra superior) para que la dueña
+    /// y soporte puedan identificar rápidamente qué build está corriendo
+    /// sin tener que abrir propiedades del ejecutable.
+    /// Lee <c>AssemblyInformationalVersion</c> y cae a <c>AssemblyVersion</c>
+    /// si el primero no está definido.
+    /// </summary>
+    public string VersionApp { get; } = ObtenerVersionApp();
+
+    private static string ObtenerVersionApp()
+    {
+        var asm = typeof(MainWindowViewModel).Assembly;
+        var info = asm.GetCustomAttribute<System.Reflection.AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+        if (!string.IsNullOrWhiteSpace(info))
+        {
+            // Algunos SDKs anexan "+<sha>" al informational version; lo recortamos.
+            var plus = info.IndexOf('+');
+            return plus >= 0 ? info[..plus] : info;
+        }
+        return asm.GetName().Version?.ToString(3) ?? "0.0.0";
+    }
 
     public DashboardViewModel DashboardVM { get; }
     public RegistroRapidoViewModel RegistroRapidoVM { get; }

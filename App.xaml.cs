@@ -467,12 +467,37 @@ public partial class App : Application
             // Bloqueo para serializar escrituras concurrentes desde varios hilos.
             lock (LogFileLock)
             {
+                RotarLogSiHaceFalta();
                 File.AppendAllText(LogFilePath, sb.ToString());
             }
         }
         catch
         {
             // Si falla el guardado del log, no hacer nada para evitar cascada de errores
+        }
+    }
+
+    /// <summary>
+    /// Si el log actual supera el tope, lo mueve a <c>error_dump.1.txt</c>
+    /// (sobrescribiendo el rotado anterior) para que el archivo "vivo" no
+    /// crezca sin límite y se mantenga manejable para enviarlo a soporte.
+    /// Debe llamarse dentro de <see cref="LogFileLock"/>.
+    /// </summary>
+    private const long LogFileMaxBytes = 1_000_000; // ~1 MB
+    private static void RotarLogSiHaceFalta()
+    {
+        try
+        {
+            var info = new FileInfo(LogFilePath);
+            if (!info.Exists || info.Length < LogFileMaxBytes) return;
+
+            var rotado = Path.Combine(LogFolder, "error_dump.1.txt");
+            if (File.Exists(rotado)) File.Delete(rotado);
+            File.Move(LogFilePath, rotado);
+        }
+        catch
+        {
+            // No interrumpir el flujo de logging por un fallo de rotación.
         }
     }
 
